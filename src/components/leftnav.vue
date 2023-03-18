@@ -1,6 +1,6 @@
 /**
 * 左边菜单
-*/ 
+*/
 <template>
   <el-menu default-active="2" :collapse="collapsed" collapse-transition router :default-active="$route.path" unique-opened class="el-menu-vertical-demo" background-color="#334157" text-color="#fff" active-text-color="#ffd04b">
     <div class="logobox">
@@ -36,6 +36,23 @@ export default {
     let res = {
       success: true,
       data: [
+        {
+          menuid: 11,
+          icon: 'li-icon-xiangmuguanli',
+          menuname: '问卷管理',
+          hasThird: null,
+          url: null,
+          menus: [
+            {
+              menuid: 22,
+              icon: 'icon-cat-skuQuery',
+              menuname: '问卷管理',
+              hasThird: 'N',
+              url: 'QnFill',
+              menus: null
+            }
+          ]
+        },
         {
           menuid: 1,
           icon: 'li-icon-xiangmuguanli',
@@ -173,7 +190,7 @@ export default {
       msg: 'success'
     }
           this.allmenu = res.data
-    
+
     // menu(localStorage.getItem('logintoken'))
     //   .then(res => {
     //     console.log(JSON.stringify(res))

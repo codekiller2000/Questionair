@@ -11,7 +11,11 @@ import router from './router';
 import store from './vuex/store';
 // 引入icon
 import './assets/icon/iconfont.css'
-// 
+//
+
+import VForm from 'vform-builds'  //引入VForm库
+import 'vform-builds/dist/VFormDesigner.css'  //引入VForm样式
+Vue.use(VForm)  //全局注册VForm(同时注册了v-form-designer和v-form-render组件)
 
 // 引入echarts
 import echarts from 'echarts'
@@ -49,7 +53,7 @@ router.beforeEach((to, from, next) => {
                     next();
                 } else {
                     /**
-                     * 防刷新，如果登录，修改路由跳转到登录页面，修改路由为登录后的首页 
+                     * 防刷新，如果登录，修改路由跳转到登录页面，修改路由为登录后的首页
                      */
                     next({
                         path: '/goods/Goods'

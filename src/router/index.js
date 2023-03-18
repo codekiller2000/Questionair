@@ -8,6 +8,12 @@ import index from '@/views/index';
 /**
  * 基础菜单
  */
+
+// 问卷管理
+import QnFill from "../views/QnFill.vue";
+import EditQn from "../views/EditQn.vue";
+import SubQnFill from "../views/SubQnFill.vue";
+
 // 商品管理
 import Goods from '@/views/goods/Goods';
 // 机器信息管理
@@ -53,7 +59,7 @@ import statistics from '@/views/charts/statistics';
 // 启用路由
 Vue.use(Router);
 
-// 导出路由 
+// 导出路由
 export default new Router({
     routes: [{
         path: '/',
@@ -65,7 +71,7 @@ export default new Router({
         }
     }, {
         path: '/login',
-        name: '登录',
+        name: 'login',
         component: login,
         hidden: true,
         meta: {
@@ -73,10 +79,32 @@ export default new Router({
         }
     }, {
         path: '/index',
-        name: '首页',
+        name: 'index',
         component: index,
         iconCls: 'el-icon-tickets',
-        children: [{
+        children: [
+          {
+            path: '/QnFill',
+            name: 'QnFill',
+            component: QnFill,
+            meta: {
+              requireAuth: true
+            }
+          },{
+            path: '/SubQnFill',
+            name: 'SubQnFill',
+            component: SubQnFill,
+            meta: {
+              requireAuth: true
+            }
+          },{
+            path: '/EditQn',
+            name: 'EditQn',
+            component: EditQn,
+            meta: {
+              requireAuth: true
+            }
+          },{
             path: '/goods/Goods',
             name: '商品管理',
             component: Goods,
