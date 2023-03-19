@@ -56,7 +56,7 @@ export default {
   // 创建完毕状态(里面是操作)
   created() {
     this.$message({
-      message: '账号密码及验证码不为空即可',
+      message: '请输入管理员账号密码',
       type: 'success'
     })
     // 获取图形验证码 todo
@@ -68,31 +68,67 @@ export default {
   methods: {
     // 获取用户名密码
     getuserpwd() {
-      if (getCookie('user') != '' && getCookie('pwd') != '') {
-        this.ruleForm.username = getCookie('user')
-        this.ruleForm.password = getCookie('pwd')
+      // if (getCookie('user') != '' && getCookie('pwd') != '') {
+      //   this.ruleForm.username = getCookie('user')
+      //   this.ruleForm.password = getCookie('pwd')
+      //   this.rememberpwd = true
+      // }
+
+
+      // getCookie('pwd') != ''
+      if ((sessionStorage.getItem("userInfo")) !== '') {
+        // console.log(22222222222222,sessionStorage.getItem("userInfo"))
+        this.ruleForm.username = sessionStorage.getItem("userInfo")
+
         this.rememberpwd = true
       }
+
     },
     //获取info列表
     submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      /*this.$refs[formName].validate(valid => {*/
+      /*  if (valid) {*/
+      /*    this.logining = true*/
+      //     // 测试通道，不为空直接登录
+      //     setTimeout(() => {
+      //       this.logining = false
+      //       this.$store.commit('login', 'true')
+      //       this.$router.push({ path: '/index' })
+      //     }, 1000)
+      //   } else {
+      //     // 获取图形验证码 todo
+      //     // this.getcode()
+      //     this.$message.error('请输入用户名密码！')
+      //     this.logining = false
+      //     return false
+      //   }
+      // })
+
+      this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.logining = true
-          // 测试通道，不为空直接登录
-          setTimeout(() => {
-            this.logining = false
-            this.$store.commit('login', 'true')
-            this.$router.push({ path: '/index' })
-          }, 1000)
+          // alert('submit!');
+
+          login({userName:this.ruleForm.username,password:this.ruleForm.password}).then(res=>{
+            console.log(res);
+
+            if(res.status===200){
+              // console.log(1111111111111111,res.data.data)
+              sessionStorage.setItem('token',res.data.data)
+              this.$store.commit('login', this.ruleForm.username)
+              this.$router.push({ path: '/index' })
+            }
+
+
+          }).catch(err=>{
+            console.log(err);
+          })
+
         } else {
-          // 获取图形验证码 todo
-          // this.getcode()
-          this.$message.error('请输入用户名密码！')
-          this.logining = false
-          return false
+          console.log('error submit!!');
+          return false;
         }
-      })
+      });
+
     },
   }
 }

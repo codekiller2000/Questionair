@@ -44,7 +44,7 @@ export default {
           url: null,
           menus: [
             {
-              menuid: 22,
+              menuid: 21,
               icon: 'icon-cat-skuQuery',
               menuname: '问卷管理',
               hasThird: 'N',

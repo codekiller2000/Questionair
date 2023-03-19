@@ -60,10 +60,10 @@
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
-          <el-button size="mini" type="success" @click="resetpwd(scope.$index, scope.row)">重置密码</el-button>
-          <el-button size="mini" type="success" @click="dataAccess(scope.$index, scope.row)">数据权限</el-button>
-          <el-button size="mini" type="success" @click="offlineUser(scope.$index, scope.row)">下线</el-button>
-          <el-button size="mini" type="success" @click="refreshCache(scope.$index, scope.row)">刷新缓存</el-button>
+<!--          <el-button size="mini" type="success" @click="resetpwd(scope.$index, scope.row)">重置密码</el-button>-->
+<!--          <el-button size="mini" type="success" @click="dataAccess(scope.$index, scope.row)">数据权限</el-button>-->
+<!--          <el-button size="mini" type="success" @click="offlineUser(scope.$index, scope.row)">下线</el-button>-->
+<!--          <el-button size="mini" type="success" @click="refreshCache(scope.$index, scope.row)">刷新缓存</el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -156,7 +156,7 @@ export default {
         userMobile: '',
         userEmail: '',
         userSex: '',
-        token: localStorage.getItem('logintoken')
+        token: sessionStorage.getItem('token')
       },
       // 部门参数
       unitparm: {
@@ -686,63 +686,9 @@ export default {
           })
         })
     },
-    // 重置密码
-    resetpwd(index, row) {
-      this.resetpsd.userId = row.userId
-      this.$confirm('确定要重置密码吗?', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          userPwd(this.resetpsd)
-            .then(res => {
-              if (res.success) {
-                this.$message({
-                  type: 'success',
-                  message: '重置密码成功！'
-                })
-                this.getdata(this.formInline)
-              } else {
-                this.$message({
-                  type: 'info',
-                  message: res.msg
-                })
-              }
-            })
-            .catch(err => {
-              this.loading = false
-              this.$message.error('重置密码失败，请稍后再试！')
-            })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消重置密码！'
-          })
-        })
-    },
+
     // 数据权限
-    dataAccess: function(index, row) {
-      this.dataAccessshow = true
-      this.saveroleId = row.userId
-      UserDeptTree(row.userId)
-        .then(res => {
-          if (res.data.success) {
-            this.checkmenu = this.changemenu(res.data.data)
-            this.UserDept = this.changeArr(res.data.data)
-          } else {
-            this.$message({
-              type: 'info',
-              message: res.data.msg
-            })
-          }
-        })
-        .catch(err => {
-          this.loading = false
-          this.$message.error('获取权限失败，请稍后再试！')
-        })
-    },
+
     //数据格式化
     changeArr(data) {
       var pos = {}
@@ -835,62 +781,9 @@ export default {
         })
     },
     // 下线用户
-    offlineUser(index, row) {
-      this.$confirm('确定要让' + row.userName + '用户下线吗?', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          userExpireToken(row.userName)
-            .then(res => {
-              if (res.success) {
-                this.$message({
-                  type: 'success',
-                  message: '用户' + row.userName + '强制下线成功！'
-                })
-                this.getdata(this.formInline)
-              } else {
-                this.$message({
-                  type: 'info',
-                  message: res.msg
-                })
-              }
-            })
-            .catch(err => {
-              this.loading = false
-              this.$message.error('用户下线失败，请稍后再试！')
-            })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消'
-          })
-        })
-    },
+
     // 刷新缓存
-    refreshCache(index, row) {
-      userFlashCache(row.userName)
-        .then(res => {
-          if (res.success) {
-            this.$message({
-              type: 'success',
-              message: '刷新成功！'
-            })
-            this.getdata(this.formInline)
-          } else {
-            this.$message({
-              type: 'info',
-              message: res.msg
-            })
-          }
-        })
-        .catch(err => {
-          this.loading = false
-          this.$message.error('刷新失败，请稍后再试！')
-        })
-    }
+
   }
 }
 </script>
@@ -904,4 +797,3 @@ export default {
 }
 </style>
 
- 

@@ -22,7 +22,7 @@ const server = axios.create({     //创建axios实例
 // 添加请求拦截器
 server.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
-  console.log(1,config);
+  // console.log(1,config);
   // config.headers.token = '7b569b6b1660fa23162567d0c35ad51a'   //一般是判断是否存在token后再决定头部是否添加token
   return config;
 }, function (error) {
@@ -32,7 +32,7 @@ server.interceptors.request.use(function (config) {
 
 server.interceptors.response.use(function (response) {
   // 对响应数据做点什么
-  console.log(2,response);
+  // console.log(2,response);
 
   // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
   // 否则的话抛出错误
