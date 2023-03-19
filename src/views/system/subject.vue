@@ -39,7 +39,7 @@
       </el-table-column>
       <el-table-column align="center" sortable prop="state" label="问卷状态" width="120">
         <template slot-scope="scope">
-          <div v-if="scope.row.state==='0'">未完成</div>
+          <div v-if="scope.row.state===0">未完成</div>
           <div v-if="scope.row.state===1">进行中</div>
           <div v-if="scope.row.state===2">已完成</div>
           <div v-if="scope.row.state===3">已终止</div>
@@ -395,7 +395,23 @@ export default {
 
         // 新增加的
         this.editForm.result=row.result
-        this.editForm.state=row.state
+
+        if(row.state===0){
+          this.editForm.state='未完成'
+        }
+        if(row.state===1){
+          this.editForm.state='进行中'
+        }
+        if(row.state===2){
+          this.editForm.state='已完成'
+          // this.value='2'
+        }
+        if(row.state===3){
+          this.editForm.state='已终止'
+
+        }
+        // this.editForm.state=row.state
+        // this.value='2'
         this.editForm.age=row.age
         if(row.gender===0){
           this.editForm.gender = '女'
@@ -437,12 +453,9 @@ export default {
           }
 
           let obj={
-            "userName": this.editForm.userName,
-            "password": "123321",
             "name": this.editForm.name,
-            "profile": this.editForm.profile,
             "phone": this.editForm.phone,
-            "email": this.editForm.email,
+            "birthday": this.editForm.email,
             "gender": sex,
             "age": this.editForm.age,
             "description": this.editForm.description,
