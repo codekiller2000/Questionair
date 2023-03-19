@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { loginReq, req } from './axiosFun';
+import { loginReq, server } from './request';
 
 // 登录接口
 export const login = (params) => { return loginReq("post", "/api/login", params) };

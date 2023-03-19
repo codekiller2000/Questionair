@@ -1,4 +1,4 @@
-import { req } from './axiosFun';
+import { server } from './request';
 
 /**
  * 问题页面相关接口
