@@ -31,6 +31,8 @@ import Order from '@/views/pay/Order';
  */
 // 用户管理
 import user from '@/views/system/user';
+// 受试者管理
+import subject from "../views/system/subject.vue";
 // 菜单管理
 import Module from '@/views/system/Module';
 // 角色管理
@@ -56,6 +58,7 @@ import druidLogin from '@/views/druid/login';
 
 // 图表界面
 import statistics from '@/views/charts/statistics';
+import subjuects from "../views/system/subject.vue";
 
 // 启用路由
 Vue.use(Router);
@@ -147,7 +150,15 @@ export default new Router({
             meta: {
                 requireAuth: true
             }
-        }, {
+        },
+          {
+            path: '/system/subject',
+            name: '受试者管理',
+            component: subject,
+            meta: {
+              requireAuth: true
+            }
+          },{
             path: '/system/Module',
             name: '菜单管理',
             component: Module,

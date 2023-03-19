@@ -23,6 +23,14 @@ const server = axios.create({     //创建axios实例
 server.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   // console.log(1,config);
+
+  let token = sessionStorage.getItem('token')
+
+  if(token){
+    config.headers.token = token
+  }
+  // console.log(22222222222222222,config.headers.token)
+
   // config.headers.token = '7b569b6b1660fa23162567d0c35ad51a'   //一般是判断是否存在token后再决定头部是否添加token
   return config;
 }, function (error) {
