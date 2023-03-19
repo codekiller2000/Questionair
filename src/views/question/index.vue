@@ -193,7 +193,7 @@ export default {
     },
     //显示查看界面
     handleCheck: function (index, row) {
-      this.questionId = this.row.id;
+      this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 3;
       this.editForm.questionNo = row.questionNo;
@@ -219,7 +219,7 @@ export default {
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
-      this.questionId = this.row.id;
+      this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 2;
       this.editForm.questionNo = row.questionNo;
