@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { loginReq, server } from './request';
+import { server } from './request';
 
 // 登录接口
-export const login = (params) => { return loginReq("post", "/api/login", params) };
+export const login = (params) => { return server("post", "/api/login", params) };
 // 获取用户菜单
 export const menu = (params) => { return axios.get("/api/menu?&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 // 退出接口

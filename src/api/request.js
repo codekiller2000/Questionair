@@ -97,4 +97,4 @@ server.interceptors.response.use(function (response) {
 });
 
 
-export default server
+export {server}
