@@ -3,22 +3,19 @@
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>模板管理</el-breadcrumb-item>
-      <el-breadcrumb-item>模块管理</el-breadcrumb-item>
+      <el-breadcrumb-item><a href="javascript:void(0)" @click="backToTemplate()">模板管理</a></el-breadcrumb-item>
+      <el-breadcrumb-item><a href="javascript:void(0)" @click="backToModule()">模块管理</a></el-breadcrumb-item>
       <el-breadcrumb-item>问题管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 搜索筛选 -->
     <el-form :inline="true" style="margin-top: 20px">
-      <!--      <el-form-item label="搜索：">-->
-      <!--        <el-input size="small" v-model="formInline.deptName" placeholder="输入部门名称"></el-input>-->
-      <!--      </el-form-item>-->
-      <!--      <el-form-item label="">-->
-      <!--        <el-input size="small" v-model="formInline.deptNo" placeholder="输入部门代码"></el-input>-->
-      <!--      </el-form-item>-->
       <el-form-item>
-        <!--        <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>-->
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleSave()">添加</el-button>
       </el-form-item>
+      <el-form-item style="float: right">
+        <el-button size="small" icon="el-icon-back" @click="backToModule()">返回</el-button>
+      </el-form-item>
+      <div style="clear: both"></div>
     </el-form>
     <!--列表-->
     <el-table size="small" :data="listData" highlight-current-row v-loading="loading" border
@@ -44,7 +41,7 @@
       </el-table-column>
     </el-table>
     <!-- 编辑界面 -->
-    <el-dialog :title="handleStatus === 1?'新增':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
+    <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
                width="50%" @click="closeDialog">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
@@ -91,8 +88,11 @@ export default {
       loading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       handleStatus: 3,
+      templateId: '',
       questionId: '',
       editForm: {
+        moduleId: '',
+        moduleNo: '',
         questionNo: '',//问题编号
         queType: '',//0 问题，1 诊断框，2 诊断框下属
         optType: '',//TEXT INPUT RADIO CHECKBOX
@@ -122,9 +122,27 @@ export default {
     }
   },
   created() {
-    this.getData()
+    this.getData();
+    //本页需要moduleId/moduleNo
+    this.editForm.moduleId = this.$route.params.moduleId
+    this.editForm.moduleNo = this.$route.params.moduleNo
+    //返回上一页需要templateId
+    this.templateId = this.$route.params.templateId
   },
   methods: {
+    backToModule() {
+      this.$router.push({
+        path: '/EditQn',
+        params: {
+          templateId: this.templateId
+        }
+      })
+    },
+    backToTemplate(){
+      this.$router.push({
+        path: '/QnFill'
+      })
+    },
     // 不分页获取列表
     getData() {
       this.loading = true
