@@ -42,31 +42,45 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="50%" @click="closeDialog">
+               width="60%" @click="closeDialog" @close="dialogClosed()">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
         <el-form-item label="编号" prop="questionNo">
-          <el-input size="small" v-model="editForm.questionNo" auto-complete="off" placeholder="问题编号"></el-input>
+          <el-input size="small" v-model="editForm.questionNo" auto-complete="off"
+                    placeholder="输入问题编号"></el-input>
         </el-form-item>
         <el-form-item label="归类" prop="queType">
-          <el-input size="small" v-model="editForm.queType" auto-complete="off" placeholder="选择类型todo"></el-input>
+          <el-radio v-model="editForm.queType" label="0">问题</el-radio>
+          <el-radio v-model="editForm.queType" label="1">诊断框</el-radio>
+          <el-radio v-model="editForm.queType" label="2">附属诊断框</el-radio>
         </el-form-item>
         <el-form-item label="题目类型" prop="optType">
-          <el-input size="small" v-model="editForm.optType" auto-complete="off"
-                    placeholder="选择题目类型todo"></el-input>
+          <el-radio v-model="editForm.optType" label="INPUT">输入</el-radio>
+          <el-radio v-model="editForm.optType" label="RADIO">单选</el-radio>
+          <el-radio v-model="editForm.optType" label="CHECKBOX">多选</el-radio>
+          <el-radio v-model="editForm.optType" label="TEXT">文本</el-radio>
         </el-form-item>
         <el-form-item label="问题内容" prop="issue">
-          <el-input size="small" v-model="editForm.issue" auto-complete="off" placeholder="问题内容todo"></el-input>
+          <el-input size="small" v-model="editForm.issue" auto-complete="off" placeholder="输入题目文本"></el-input>
         </el-form-item>
-        <el-form-item label="问题补充">
-          <el-input size="small" v-model="editForm.note" auto-complete="off" placeholder="问题补充todo"></el-input>
+        <el-form-item label="补充信息">
+          <el-input size="small" v-model="editForm.note" auto-complete="off" placeholder="输入补充信息"></el-input>
         </el-form-item>
         <el-form-item label="由谁作答" prop="answers">
-          <el-input size="small" v-model="editForm.answers" auto-complete="off" placeholder="answers todo"></el-input>
+          <el-radio v-model="editForm.answers" label="0">管理员</el-radio>
+          <el-radio v-model="editForm.answers" label="1">受试者</el-radio>
         </el-form-item>
         <el-form-item label="排序序号" prop="serialNum">
-          <el-input size="small" v-model="editForm.serialNum" auto-complete="off"
-                    placeholder="问题会按序号依次出现"></el-input>
+          <el-input-number v-model="editForm.serialNum" :min="1" step-strictly
+                           label="问题将按序号展示"></el-input-number>
+        </el-form-item>
+        <el-form-item label="选项">
+          <el-button type="primary" icon="el-icon-edit" v-if="handleStatus === 1 || handleStatus === 2" circle
+                     @click="openOptionDialog"></el-button>
+          <span v-if="!this.editForm.opData.options.length">无</span>
+          <span v-for="(item,i) in editForm.opData.options" :key="i">
+            <el-tag v-if="item.label" v-text="item.label" style="margin: auto 3px"></el-tag>
+          </span>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -74,6 +88,26 @@
         <el-button size="small" v-if="handleStatus === 1 || handleStatus === 2" type="primary" :loading="loading"
                    @click="submitForm('editForm')">保存
         </el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="在此页面编辑选项" :visible.sync="optionDialogVisible" width="50%" style="text-align: center"
+               @click="closeOptionDialog" @close="transferOption()" id="optionFormDialog">
+      <div v-if="!editForm.opData.options.length">点击 + 号编辑选项</div>
+      <el-form v-for="(item ,i) in editForm.opData.options" :key="i" label-width="60px" ref="optionForm">
+        <el-form-item :label="`选项${i+1}`">
+          <el-input size="small" v-model="editForm.opData.options[i].label" auto-complete="off" placeholder="输入选项文本">
+            <el-input-number size="small" v-model="editForm.opData.options[i].value" step-strictly auto-complete="off"
+                             slot="append"
+                             placeholder="取值">
+            </el-input-number>
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="success" icon="el-icon-plus" circle style="float: left" @click="addOption()"></el-button>
+        <el-button type="danger" icon="el-icon-minus" circle style="float: left" @click="minusOption()"></el-button>
+        <el-button size="small" @click="closeOptionDialog()">关闭</el-button>
+        <div style="clear: both"></div>
       </div>
     </el-dialog>
   </div>
@@ -87,6 +121,7 @@ export default {
     return {
       loading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
+      optionDialogVisible: false,
       handleStatus: 3,
       templateId: '',
       questionId: '',
@@ -100,6 +135,7 @@ export default {
         note: '',//问题补充
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
+        opData: {options: []}
       },
       // rules表单验证
       rules: {
@@ -138,7 +174,7 @@ export default {
         }
       })
     },
-    backToTemplate(){
+    backToTemplate() {
       this.$router.push({
         path: '/QnFill'
       })
@@ -221,6 +257,7 @@ export default {
       this.editForm.note = row.note;
       this.editForm.answers = row.answers;
       this.editForm.serialNum = row.serialNum;
+      this.editForm.opData.options = row.opData.options;
     },
     //显示添加界面
     handleSave: function () {
@@ -234,6 +271,7 @@ export default {
       this.editForm.note = '';
       this.editForm.answers = '';
       this.editForm.serialNum = '';
+      this.editForm.opData.options = [];
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
@@ -247,6 +285,7 @@ export default {
       this.editForm.note = row.note;
       this.editForm.answers = row.answers;
       this.editForm.serialNum = row.serialNum;
+      this.editForm.opData.options = row.opData.options;
     },
     // 编辑、增加页面保存方法
     submitForm(formRefsName) {
@@ -311,12 +350,43 @@ export default {
         console.log(err)
       })
     },
-    // 关闭编辑、增加弹出框
     closeDialog() {
       this.editFormVisible = false
+    },
+    openOptionDialog() {
+      this.optionDialogVisible = true;
+    },
+    closeOptionDialog() {
+      this.optionDialogVisible = false;
+    },
+    addOption() {
+      this.editForm.opData.options.push({label: '', value: 0})
+    },
+    minusOption() {
+      this.editForm.opData.options.pop()
+    },
+    transferOption() {
+      let arr = [];
+      this.editForm.opData.options.forEach(item => {
+        if (item.label) {
+          if (!item.value) {
+            item.value = 0;
+          }
+          arr.push(item);
+        }
+      })
+      this.editForm.opData.options = arr;
     }
   }
 }
 </script>
 <style>
+#optionFormDialog .el-input-group__append {
+  border: 0;
+  padding: 0;
+}
+
+#optionFormDialog .el-dialog__body {
+  padding: 30px 20px 0 20px;
+}
 </style>
