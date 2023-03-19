@@ -1,13 +1,26 @@
-import { server } from './request';
+import {server} from './request';
 
-/**
- * 问题页面相关接口
- **/
+let token = sessionStorage.getItem("token");
 // 根据模板id查询问题列表
-export const questionList = (params) => { return req("GET", "/api/Goods/list", params) };
+export const questionList = () => {
+  return server("GET", "/api/Goods/list")
+};
 // 保存问题
-export const questionSave = (params) => { return req("POST", "/api/Goods/save", params) };
+export const saveQuestion = (data) => {
+  return server.post("/question/create", data, {
+    header: {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNjM2Njg5NzM1MTk5ODg3MzYyIiwiaWF0IjoxNjc5MDU0NjUyLCJleHAiOjE2Nzk2NTk0NTJ9.hxrgUWFqBJoFvjBd_jTOrqR1UPzD-JA3Rxz4xvGKXBHFMKS3bVDhR23-3goz-ZQwp2Obtjv635jGVtxYmjClXA"}
+  })
+};
 // 更新问题
-export const questionUpdate = (params) => { return axios.delete("/api/Goods/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
+export const updateQuestion = (id, data) => {
+  return server.put(`/question/${id}`, data, {
+    header: {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNjM2Njg5NzM1MTk5ODg3MzYyIiwiaWF0IjoxNjc5MDU0NjUyLCJleHAiOjE2Nzk2NTk0NTJ9.hxrgUWFqBJoFvjBd_jTOrqR1UPzD-JA3Rxz4xvGKXBHFMKS3bVDhR23-3goz-ZQwp2Obtjv635jGVtxYmjClXA"}
+  })
+};
 // 删除问题
-export const questionDelete = (params) => { return req("post", "/api/Goods/list", params) };
+export const deleteQuestion = (id) => {
+  return server.delete(`/question/${id}`, {
+      header: {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNjM2Njg5NzM1MTk5ODg3MzYyIiwiaWF0IjoxNjc5MDU0NjUyLCJleHAiOjE2Nzk2NTk0NTJ9.hxrgUWFqBJoFvjBd_jTOrqR1UPzD-JA3Rxz4xvGKXBHFMKS3bVDhR23-3goz-ZQwp2Obtjv635jGVtxYmjClXA"}
+    }
+  )
+};

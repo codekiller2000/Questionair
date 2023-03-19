@@ -51,7 +51,7 @@ export default {
               url: 'QnFill',
               menus: null
             },{
-              menuid: 22,
+              menuid: 23,
               icon: 'icon-cat-skuQuery',
               menuname: '问ti管理',
               hasThird: 'N',

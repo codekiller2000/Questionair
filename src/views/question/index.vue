@@ -8,7 +8,7 @@
       <el-breadcrumb-item>问题管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 搜索筛选 -->
-    <el-form :inline="true" :model="formInline" style="margin-top: 20px">
+    <el-form :inline="true" style="margin-top: 20px">
       <!--      <el-form-item label="搜索：">-->
       <!--        <el-input size="small" v-model="formInline.deptName" placeholder="输入部门名称"></el-input>-->
       <!--      </el-form-item>-->
@@ -39,7 +39,7 @@
         <template slot-scope="scope">
           <el-button size="mini" @click="handleCheck(scope.$index, scope.row)">查看</el-button>
           <el-button size="mini" type="primary" @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,6 +91,7 @@ export default {
       loading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       handleStatus: 3,
+      questionId: '',
       editForm: {
         questionNo: '',//问题编号
         queType: '',//0 问题，1 诊断框，2 诊断框下属
@@ -116,11 +117,8 @@ export default {
           {required: true, message: '请输入排序序号', trigger: 'blur'}
         ]
       },
-      formInline: {
-        page: 1,
-        limit: 10,
-      },
-      listData: [], //用户数据
+      //用户数据
+      listData: []
     }
   },
   created() {
@@ -137,6 +135,7 @@ export default {
         count: 5,
         data: [
           {
+            "id": "q10001",
             "questionNo": "2e",
             "queType": 1,
             "optType": "RADIO",
@@ -192,18 +191,9 @@ export default {
       //     this.$message.error('菜单加载失败，请稍后再试！')
       //   })
     },
-    // 分页插件事件
-    callFather(parm) {
-      this.formInline.page = parm.currentPage
-      this.formInline.limit = parm.pageSize
-      this.getData()
-    },
-    // 搜索事件
-    search() {
-      this.getData()
-    },
     //显示查看界面
     handleCheck: function (index, row) {
+      this.questionId = this.row.id;
       this.editFormVisible = true
       this.handleStatus = 3;
       this.editForm.questionNo = row.questionNo;
@@ -216,6 +206,7 @@ export default {
     },
     //显示添加界面
     handleSave: function () {
+      this.questionId = '';
       this.editFormVisible = true
       this.handleStatus = 1;
       this.editForm.questionNo = '';
@@ -228,6 +219,7 @@ export default {
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
+      this.questionId = this.row.id;
       this.editFormVisible = true
       this.handleStatus = 2;
       this.editForm.questionNo = row.questionNo;
@@ -244,61 +236,61 @@ export default {
         if (!valid) {
           return false;
         }
-        deptSave(this.editForm)
-          .then(res => {
+        this.loading = true;
+        if (this.handleStatus === 1) {
+          saveQuestion(this.editForm).then(res => {
             this.editFormVisible = false
             this.loading = false
-            if (res.success) {
+            if (res.data.code === "000000") {
               this.getData()
-              this.$message({
-                type: 'success',
-                message: '公司保存成功！'
-              })
+              this.$message.success("保存成功")
             } else {
-              this.$message({
-                type: 'info',
-                message: res.msg
-              })
+              this.$message.warning(res.data.msg)
             }
-          })
-          .catch(err => {
+          }).catch(err => {
             this.editFormVisible = false
             this.loading = false
-            this.$message.error('公司保存失败，请稍后再试！')
+            this.$message.error('系统出错，保存失败')
           })
+        } else if (this.handleStatus === 2) {
+          updateQuestion(this.questionId, this.editForm).then(res => {
+            this.editFormVisible = false
+            this.loading = false
+            if (res.data.code === "000000") {
+              this.getData()
+              this.$message.success("保存成功")
+            } else {
+              this.$message.warning(res.data.msg)
+            }
+          }).catch(err => {
+            this.editFormVisible = false
+            this.loading = false
+            this.$message.error('系统出错，保存失败')
+          })
+        }
       })
     },
-    // 删除公司
-    deleteUser(index, row) {
+    // 删除
+    deleteItem(index, row) {
       this.$confirm('确定要删除吗？', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deptDelete(row.deptId)
-          .then(res => {
-            if (res.success) {
-              this.$message({
-                type: 'success',
-                message: '公司已删除!'
-              })
-              this.getData()
-            } else {
-              this.$message({
-                type: 'info',
-                message: res.msg
-              })
-            }
-          })
-          .catch(err => {
-            this.loading = false
-            this.$message.error('公司删除失败，请稍后再试！')
-          })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消操作'
+        deleteQuestion(row.id).then(res => {
+          this.loading = true;
+          if (res.data.code === "000000") {
+            this.$message.success("操作成功")
+            this.getData();
+          } else {
+            this.$message.warning(res.data.msg)
+          }
+        }).catch(err => {
+          this.loading = false
+          this.$message.error('系统错误，操作失败')
         })
+      }).catch(err => {
+        console.log(err)
       })
     },
     // 关闭编辑、增加弹出框
