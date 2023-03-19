@@ -16,6 +16,7 @@ import SubQnFill from "../views/SubQnFill.vue";
 
 // 商品管理
 import Goods from '@/views/goods/Goods';
+import Question from '@/views/question/index';
 // 机器信息管理
 import Machine from '@/views/machine/Machine';
 // 货道信息管理
@@ -108,6 +109,13 @@ export default new Router({
             path: '/goods/Goods',
             name: '商品管理',
             component: Goods,
+            meta: {
+                requireAuth: true
+            }
+        },{
+            path: '/question/index',
+            name: '问ti管理',
+            component: Question,
             meta: {
                 requireAuth: true
             }

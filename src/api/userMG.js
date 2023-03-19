@@ -1,15 +1,15 @@
 import axios from 'axios';
-import { loginreq, req } from './axiosFun';
+import { loginReq, req } from './axiosFun';
 
-// 登录接口 
-export const login = (params) => { return loginreq("post", "/api/login", params) };
+// 登录接口
+export const login = (params) => { return loginReq("post", "/api/login", params) };
 // 获取用户菜单
 export const menu = (params) => { return axios.get("/api/menu?&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 // 退出接口
 export const loginout = () => { return axios.delete("/api/login?&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 
 /**
- * 用户管理 
+ * 用户管理
  **/
 // 用户管理-获取用户列表
 export const userList = (params) => { return req("post", "/api/User/list", params) };
@@ -49,7 +49,7 @@ export const ModuleSave = (params) => { return req("post", "/api/Module/save", p
 export const ModuleDelete = (params) => { return axios.delete("/api/Module/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 
 /**
- * 角色管理 
+ * 角色管理
  **/
 // 角色管理-获取角色列表
 export const roleList = (params) => { return req("post", "/api/Role/list", params) };
@@ -63,7 +63,7 @@ export const RoleRightTree = (params) => { return axios.get("/api/RoleRight/tree
 export const RoleRightSave = (params) => { return req("post", "/api/RoleRight/save", params) };
 
 /**
- * 公司管理 
+ * 公司管理
  **/
 // 公司管理-获取公司列表
 export const deptList = (params) => { return req("post", "/api/Dept/list", params) };
@@ -73,7 +73,7 @@ export const deptSave = (params) => { return req("post", "/api/Dept/save", param
 export const deptDelete = (params) => { return axios.get("/api/Dept/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 
 /**
- * 系统环境变量 
+ * 系统环境变量
  **/
 // 系统环境变量-获取系统环境变量列表
 export const variableList = (params) => { return req("post", "/api/Variable/list", params) };
@@ -83,7 +83,7 @@ export const variableSave = (params) => { return req("post", "/api/Variable/save
 export const variableDelete = (params) => { return axios.delete("/api/Variable/delete?ids=" + params + "&token=" + localStorage.getItem('logintoken')).then(res => res.data) };
 
 /**
- * 权限管理 
+ * 权限管理
  **/
 // 权限管理-获取权限列表
 export const permissionList = (params) => { return req("post", "/api/Permission/list", params) };

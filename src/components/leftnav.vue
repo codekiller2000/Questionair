@@ -50,6 +50,13 @@ export default {
               hasThird: 'N',
               url: 'QnFill',
               menus: null
+            },{
+              menuid: 22,
+              icon: 'icon-cat-skuQuery',
+              menuname: '问ti管理',
+              hasThird: 'N',
+              url: 'question/index',
+              menus: null
             }
           ]
         },

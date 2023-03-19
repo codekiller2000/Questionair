@@ -59,11 +59,10 @@ export default {
       message: '账号密码及验证码不为空即可',
       type: 'success'
     })
-    // 获取图形验证码
-    this.getcode()
+    // 获取图形验证码 todo
+    // this.getcode()
     // 获取存在本地的用户名密码
     this.getuserpwd()
-    
   },
   // 里面的函数只有调用才会执行
   methods: {
@@ -84,39 +83,11 @@ export default {
           setTimeout(() => {
             this.logining = false
             this.$store.commit('login', 'true')
-            this.$router.push({ path: '/goods/Goods' })
+            this.$router.push({ path: '/index' })
           }, 1000)
-          // 注释
-          // login(this.ruleForm).then(res => {
-          //   if (res.success) {
-          //     if (this.rememberpwd) {
-          //       //保存帐号到cookie，有效期7天
-          //       setCookie('user', this.ruleForm.username, 7)
-          //       //保存密码到cookie，有效期7天
-          //       setCookie('pwd', this.ruleForm.password, 7)
-          //     } else {
-          //       delCookie('user')
-          //       delCookie('pwd')
-          //     }
-          //     //如果请求成功就让他2秒跳转路由
-          //     setTimeout(() => {
-          //       this.logining = false
-          //       // 缓存token
-          //       localStorage.setItem('logintoken', res.data.token)
-          //       // 缓存用户个人信息
-          //       localStorage.setItem('userdata', JSON.stringify(res.data))
-          //       this.$store.commit('login', 'true')
-          //       this.$router.push({ path: '/goods/Goods' })
-          //     }, 1000)
-          //   } else {
-          //     this.$message.error(res.msg)
-          //     this.logining = false
-          //     return false
-          //   }
-          // })
         } else {
-          // 获取图形验证码
-          this.getcode()
+          // 获取图形验证码 todo
+          // this.getcode()
           this.$message.error('请输入用户名密码！')
           this.logining = false
           return false
