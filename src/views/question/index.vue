@@ -42,7 +42,7 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="60%" @click="closeDialog" @close="dialogClosed()">
+               width="60%" @click="closeDialog">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
         <el-form-item label="编号" prop="questionNo">
@@ -196,7 +196,7 @@ export default {
             "issue": "测试一下问题(接口更新1)长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长",
             "note": "补充说明1",
             "answers": 1,
-            "optData": {
+            "opData": {
               "options": [
                 {
                   "label": "否",
@@ -247,6 +247,7 @@ export default {
     },
     //显示查看界面
     handleCheck: function (index, row) {
+      console.log(row.opData)
       this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 3;
@@ -257,7 +258,8 @@ export default {
       this.editForm.note = row.note;
       this.editForm.answers = row.answers;
       this.editForm.serialNum = row.serialNum;
-      this.editForm.opData.options = row.opData.options;
+      //深拷贝
+      this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
     },
     //显示添加界面
     handleSave: function () {
@@ -275,6 +277,7 @@ export default {
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
+      console.log(row.opData)
       this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 2;
@@ -285,7 +288,8 @@ export default {
       this.editForm.note = row.note;
       this.editForm.answers = row.answers;
       this.editForm.serialNum = row.serialNum;
-      this.editForm.opData.options = row.opData.options;
+      //深拷贝
+      this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
     },
     // 编辑、增加页面保存方法
     submitForm(formRefsName) {
