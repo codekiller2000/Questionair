@@ -42,7 +42,7 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="60%" @click="closeDialog">
+               width="60%" @click="closeDialog" v-loading="dialogLoading">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
         <el-form-item label="编号" prop="questionNo">
@@ -82,10 +82,15 @@
             <el-tag v-if="item.label" v-text="item.label" style="margin: auto 3px"></el-tag>
           </span>
         </el-form-item>
+        <el-form-item label="参考题目">
+          <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
+                   :props="defaultTreeProps" ref="refIdsTree">
+          </el-tree>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
-        <el-button size="small" v-if="handleStatus === 1 || handleStatus === 2" type="primary" :loading="loading"
+        <el-button size="small" v-if="handleStatus === 1 || handleStatus === 2" type="primary"
                    @click="submitForm('editForm')">保存
         </el-button>
       </div>
@@ -95,8 +100,9 @@
       <div v-if="!editForm.opData.options.length">点击 + 号编辑选项</div>
       <el-form v-for="(item ,i) in editForm.opData.options" :key="i" label-width="60px" ref="optionForm">
         <el-form-item :label="`选项${i+1}`">
-          <el-input size="small" v-model="editForm.opData.options[i].label" auto-complete="off" placeholder="输入选项文本">
-            <el-input-number size="small" v-model="editForm.opData.options[i].value" step-strictly auto-complete="off"
+          <el-input size="small" v-model="item.label" auto-complete="off"
+                    placeholder="输入选项文本">
+            <el-input-number size="small" v-model="item.value" step-strictly auto-complete="off"
                              slot="append"
                              placeholder="取值">
             </el-input-number>
@@ -114,12 +120,13 @@
 </template>
 
 <script>
-import {saveQuestion, updateQuestion, deleteQuestion} from '../../api/question'
+import {saveQuestion, updateQuestion, deleteQuestion, querySimplifiedTree} from '../../api/question'
 
 export default {
   data() {
     return {
       loading: false, //是显示加载
+      dialogLoading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       optionDialogVisible: false,
       handleStatus: 3,
@@ -135,8 +142,15 @@ export default {
         note: '',//问题补充
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
-        opData: {options: []}
+        opData: {options: []},
+        refIds:[]
       },
+      defaultTreeNodes: [],
+      defaultTreeProps: {
+        label: 'no',
+        children: 'questions'
+      },
+      moduleSimplifiedTree: [],
       // rules表单验证
       rules: {
         questionNo: [
@@ -247,7 +261,6 @@ export default {
     },
     //显示查看界面
     handleCheck: function (index, row) {
-      console.log(row.opData)
       this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 3;
@@ -260,6 +273,7 @@ export default {
       this.editForm.serialNum = row.serialNum;
       //深拷贝
       this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
+      this.dialogOpened(row.refIds);
     },
     //显示添加界面
     handleSave: function () {
@@ -274,10 +288,10 @@ export default {
       this.editForm.answers = '';
       this.editForm.serialNum = '';
       this.editForm.opData.options = [];
+      this.dialogOpened();
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
-      console.log(row.opData)
       this.questionId = row.id;
       this.editFormVisible = true
       this.handleStatus = 2;
@@ -290,6 +304,7 @@ export default {
       this.editForm.serialNum = row.serialNum;
       //深拷贝
       this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
+      this.dialogOpened(row.refIds);
     },
     // 编辑、增加页面保存方法
     submitForm(formRefsName) {
@@ -298,6 +313,7 @@ export default {
           return false;
         }
         this.loading = true;
+        this.editForm.refIds = this.$refs["refIdsTree"].getCheckedKeys(true);
         if (this.handleStatus === 1) {
           saveQuestion(this.editForm).then(res => {
             this.editFormVisible = false
@@ -380,6 +396,27 @@ export default {
         }
       })
       this.editForm.opData.options = arr;
+    },
+    //defaultTreeNodes默认值
+    dialogOpened(defaultTreeNodes) {
+      this.dialogLoading = true;
+      querySimplifiedTree(this.templateId).then(res => {
+        if (res.data.code === "000000") {
+          this.moduleSimplifiedTree = res.data.data;
+          if (defaultTreeNodes){
+            this.defaultTreeNodes = defaultTreeNodes;
+          } else {
+            this.defaultTreeNodes = [];
+          }
+        } else {
+          this.$message.warning(res.data.msg)
+        }
+        this.dialogLoading = false
+      }).catch(err => {
+        this.dialogLoading = false
+        this.editFormVisible = false;
+        this.$message.error('系统错误，操作失败')
+      })
     }
   }
 }
