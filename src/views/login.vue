@@ -111,11 +111,13 @@ export default {
           login({userName:this.ruleForm.username,password:this.ruleForm.password}).then(res=>{
             console.log(res);
 
-            if(res.status===200){
+            if(res.data.code==='000000'){
               // console.log(1111111111111111,res.data.data)
               sessionStorage.setItem('token',res.data.data)
               this.$store.commit('login', this.ruleForm.username)
               this.$router.push({ path: '/index' })
+            }else {
+              alert('账号密码错误!');
             }
 
 
