@@ -44,7 +44,7 @@ export default {
           url: null,
           menus: [
             {
-              menuid: 22,
+              menuid: 21,
               icon: 'icon-cat-skuQuery',
               menuname: '问卷管理',
               hasThird: 'N',
@@ -104,9 +104,17 @@ export default {
             {
               menuid: 72,
               icon: 'icon-cus-manage',
-              menuname: '用户管理',
+              menuname: '管理员管理',
               hasThird: 'N',
               url: 'system/user',
+              menus: null
+            },
+            {
+              menuid: 722,
+              icon: 'icon-cus-manage',
+              menuname: '受试者管理',
+              hasThird: 'N',
+              url: 'system/subject',
               menus: null
             },
             {

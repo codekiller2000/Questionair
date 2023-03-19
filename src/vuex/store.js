@@ -27,10 +27,14 @@ export default new Vuex.Store({
         login(state, user) {
             state.user = user;
             localStorage.setItem("userInfo", user);
+            sessionStorage.setItem("userInfo", user);
+
+            // console.log(3333333333,sessionStorage.getItem("userInfo"))
         },
         // 退出
         logout(state, user) {
             state.user = "";
+            // sessionStorage.setItem("userInfo", user);
             localStorage.setItem("userInfo", "");
         },
 
