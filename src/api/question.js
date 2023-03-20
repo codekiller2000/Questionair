@@ -1,9 +1,9 @@
 import {server} from './request';
 
-let token = sessionStorage.getItem("token");
 // 根据模板id查询问题列表
-export const questionList = () => {
-  return server("GET", "/api/Goods/list")
+export const questionList = (moduleId) => {
+  moduleId = 'm10001';//todo 要删
+  return server.get(`/question/queryByModule/${moduleId}`)
 };
 // 保存问题
 export const saveQuestion = (data) => {

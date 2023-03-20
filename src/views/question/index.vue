@@ -77,12 +77,17 @@
         <el-form-item label="选项">
           <el-button type="primary" icon="el-icon-edit" v-if="handleStatus === 1 || handleStatus === 2" circle
                      @click="openOptionDialog"></el-button>
-          <span v-if="!this.editForm.opData.options.length">无</span>
-          <span v-for="(item,i) in editForm.opData.options" :key="i">
+          <span v-if="!this.editForm.optData.options.length">无</span>
+          <span v-for="(item,i) in editForm.optData.options" :key="i">
             <el-tag v-if="item.label" v-text="item.label" style="margin: auto 3px"></el-tag>
           </span>
         </el-form-item>
         <el-form-item label="参考题目">
+          <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
+                   :props="defaultTreeProps" ref="refIdsTree">
+          </el-tree>
+        </el-form-item>
+        <el-form-item label="跳转规则">
           <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
                    :props="defaultTreeProps" ref="refIdsTree">
           </el-tree>
@@ -97,8 +102,8 @@
     </el-dialog>
     <el-dialog title="在此页面编辑选项" :visible.sync="optionDialogVisible" width="50%" style="text-align: center"
                @click="closeOptionDialog" @close="transferOption()" id="optionFormDialog">
-      <div v-if="!editForm.opData.options.length">点击 + 号编辑选项</div>
-      <el-form v-for="(item ,i) in editForm.opData.options" :key="i" label-width="60px" ref="optionForm">
+      <div v-if="!editForm.optData.options.length">点击 + 号编辑选项</div>
+      <el-form v-for="(item ,i) in editForm.optData.options" :key="i" label-width="60px" ref="optionForm">
         <el-form-item :label="`选项${i+1}`">
           <el-input size="small" v-model="item.label" auto-complete="off"
                     placeholder="输入选项文本">
@@ -120,7 +125,7 @@
 </template>
 
 <script>
-import {saveQuestion, updateQuestion, deleteQuestion, querySimplifiedTree} from '../../api/question'
+import {saveQuestion, updateQuestion, deleteQuestion, querySimplifiedTree, questionList} from '../../api/question'
 
 export default {
   data() {
@@ -142,8 +147,8 @@ export default {
         note: '',//问题补充
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
-        opData: {options: []},
-        refIds:[]
+        optData: {options: []},
+        refIds: []
       },
       defaultTreeNodes: [],
       defaultTreeProps: {
@@ -174,10 +179,10 @@ export default {
   created() {
     this.getData();
     //本页需要moduleId/moduleNo
-    this.editForm.moduleId = this.$route.params.moduleId
-    this.editForm.moduleNo = this.$route.params.moduleNo
+    this.editForm.moduleId = this.$route.params.moduleId;
+    this.editForm.moduleNo = this.$route.params.moduleNo;
     //返回上一页需要templateId
-    this.templateId = this.$route.params.templateId
+    this.templateId = this.$route.params.templateId;
   },
   methods: {
     backToModule() {
@@ -195,69 +200,20 @@ export default {
     },
     // 不分页获取列表
     getData() {
-      this.loading = true
-      // 模拟数据开始
-      let res = {
-        code: 0,
-        msg: null,
-        count: 5,
-        data: [
-          {
-            "id": "q10001",
-            "questionNo": "2e",
-            "queType": 1,
-            "optType": "RADIO",
-            "issue": "测试一下问题(接口更新1)长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长",
-            "note": "补充说明1",
-            "answers": 1,
-            "opData": {
-              "options": [
-                {
-                  "label": "否",
-                  "value": 0
-                },
-                {
-                  "label": "是",
-                  "value": 1
-                },
-                {
-                  "label": "不知道",
-                  "value": 2
-                }
-              ]
-            },
-            "skipRule": null,
-            "refIds": [
-              "1636340836291145729",
-              "q10003"
-            ],
-            "serialNum": 1
+      this.loading = true;
+      questionList(this.editForm.moduleId)
+        .then(res => {
+          this.loading = false
+          if (res.data.code === "000000") {
+            this.listData = res.data.data
+          } else {
+            this.$message.warning(res.data.msg)
           }
-        ]
-      }
-      this.loading = false
-      this.listData = res.data
-      // 模拟数据结束
-
-      /***
-       * 调用接口，注释上面模拟数据 取消下面注释
-       */
-      // deptList(parameter)
-      //   .then(res => {
-      //     this.loading = false
-      //     if (res.success == false) {
-      //       this.$message({
-      //         type: 'info',
-      //         message: res.msg
-      //       })
-      //     } else {
-      //       this.listData = res.data
-      //     }
-      //   })
-      //   .catch(err => {
-      //     this.loading = false
-      //     this.$message.error('菜单加载失败，请稍后再试！')
-      //   })
+        })
+        .catch(err => {
+          this.loading = false
+          this.$message.error('菜单加载失败，请稍后再试！')
+        })
     },
     //显示查看界面
     handleCheck: function (index, row) {
@@ -265,14 +221,14 @@ export default {
       this.editFormVisible = true
       this.handleStatus = 3;
       this.editForm.questionNo = row.questionNo;
-      this.editForm.queType = row.queType;
+      this.editForm.queType = row.queType ? row.queType + '' : '';
       this.editForm.optType = row.optType;
       this.editForm.issue = row.issue;
       this.editForm.note = row.note;
-      this.editForm.answers = row.answers;
+      this.editForm.answers = row.answers ? row.answers + '' : '';
       this.editForm.serialNum = row.serialNum;
       //深拷贝
-      this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
+      this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
       this.dialogOpened(row.refIds);
     },
     //显示添加界面
@@ -287,7 +243,7 @@ export default {
       this.editForm.note = '';
       this.editForm.answers = '';
       this.editForm.serialNum = '';
-      this.editForm.opData.options = [];
+      this.editForm.optData.options = [];
       this.dialogOpened();
     },
     //显示编辑界面
@@ -296,14 +252,14 @@ export default {
       this.editFormVisible = true
       this.handleStatus = 2;
       this.editForm.questionNo = row.questionNo;
-      this.editForm.queType = row.queType;
+      this.editForm.queType = row.queType ? row.queType + '' : '';
       this.editForm.optType = row.optType;
       this.editForm.issue = row.issue;
       this.editForm.note = row.note;
-      this.editForm.answers = row.answers;
+      this.editForm.answers = row.answers ? row.answers + '' : '';
       this.editForm.serialNum = row.serialNum;
       //深拷贝
-      this.editForm.opData.options = JSON.parse(JSON.stringify(row.opData.options))
+      this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
       this.dialogOpened(row.refIds);
     },
     // 编辑、增加页面保存方法
@@ -380,14 +336,14 @@ export default {
       this.optionDialogVisible = false;
     },
     addOption() {
-      this.editForm.opData.options.push({label: '', value: 0})
+      this.editForm.optData.options.push({label: '', value: 0})
     },
     minusOption() {
-      this.editForm.opData.options.pop()
+      this.editForm.optData.options.pop()
     },
     transferOption() {
       let arr = [];
-      this.editForm.opData.options.forEach(item => {
+      this.editForm.optData.options.forEach(item => {
         if (item.label) {
           if (!item.value) {
             item.value = 0;
@@ -395,7 +351,7 @@ export default {
           arr.push(item);
         }
       })
-      this.editForm.opData.options = arr;
+      this.editForm.optData.options = arr;
     },
     //defaultTreeNodes默认值
     dialogOpened(defaultTreeNodes) {
@@ -403,7 +359,7 @@ export default {
       querySimplifiedTree(this.templateId).then(res => {
         if (res.data.code === "000000") {
           this.moduleSimplifiedTree = res.data.data;
-          if (defaultTreeNodes){
+          if (defaultTreeNodes) {
             this.defaultTreeNodes = defaultTreeNodes;
           } else {
             this.defaultTreeNodes = [];
