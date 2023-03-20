@@ -88,9 +88,7 @@
           </el-tree>
         </el-form-item>
         <el-form-item label="跳转规则">
-          <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
-                   :props="defaultTreeProps" ref="refIdsTree">
-          </el-tree>
+          <el-button type="primary" round @click="openSkipDialog()">设置</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -107,8 +105,7 @@
         <el-form-item :label="`选项${i+1}`">
           <el-input size="small" v-model="item.label" auto-complete="off"
                     placeholder="输入选项文本">
-            <el-input-number size="small" v-model="item.value" step-strictly auto-complete="off"
-                             slot="append"
+            <el-input-number size="small" v-model="item.value" step-strictly auto-complete="off" slot="append"
                              placeholder="取值">
             </el-input-number>
           </el-input>
@@ -118,6 +115,23 @@
         <el-button type="success" icon="el-icon-plus" circle style="float: left" @click="addOption()"></el-button>
         <el-button type="danger" icon="el-icon-minus" circle style="float: left" @click="minusOption()"></el-button>
         <el-button size="small" @click="closeOptionDialog()">关闭</el-button>
+        <div style="clear: both"></div>
+      </div>
+    </el-dialog>
+    <el-dialog title="在此页面设置跳转规则" :visible.sync="skipDialogVisible" width="50%" style="text-align: center"
+               @click="closeSkipDialog" @close="transferSkip()" id="skipFormDialog">
+<!--      <div v-if="!editForm.skipRules.length">点击 + 号新增一条规则</div>-->
+<!--      <el-form v-for="(item ,i) in editForm.skipRules" :key="i" label-width="60px" ref="skipForm">-->
+      <el-form ref="skipForm">
+<!--        <el-form-item :label="`${i+1}、符合以下条件时跳转到：`">-->
+        <el-form-item :label="`1、符合以下条件时跳转到：`">
+
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="success" icon="el-icon-plus" circle style="float: left" @click="addSkip()"></el-button>
+        <el-button type="danger" icon="el-icon-minus" circle style="float: left" @click="minusSkip()"></el-button>
+        <el-button size="small" @click="closeSkipDialog()">关闭</el-button>
         <div style="clear: both"></div>
       </div>
     </el-dialog>
@@ -134,6 +148,7 @@ export default {
       dialogLoading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       optionDialogVisible: false,
+      skipDialogVisible: false,
       handleStatus: 3,
       templateId: '',
       questionId: '',
@@ -148,7 +163,8 @@ export default {
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
         optData: {options: []},
-        refIds: []
+        refIds: [],
+        skipRules: []
       },
       defaultTreeNodes: [],
       defaultTreeProps: {
@@ -373,6 +389,15 @@ export default {
         this.editFormVisible = false;
         this.$message.error('系统错误，操作失败')
       })
+    },
+    openSkipDialog() {
+      this.skipDialogVisible = true;
+    },
+    closeSkipDialog() {
+      this.skipDialogVisible = false;
+    },
+    transferSkip() {
+
     }
   }
 }
