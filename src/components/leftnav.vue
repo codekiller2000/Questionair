@@ -46,14 +46,14 @@ export default {
             {
               menuid: 21,
               icon: 'icon-cat-skuQuery',
-              menuname: '问卷管理',
+              menuname: '模板管理',
               hasThird: 'N',
-              url: 'QnFill',
+              url: 'questionTemplate/index',
               menus: null
             },{
               menuid: 23,
               icon: 'icon-cat-skuQuery',
-              menuname: '问ti管理',
+              menuname: '问题管理',
               hasThird: 'N',
               url: 'question/index',
               menus: null

@@ -39,8 +39,12 @@ export const userFlashCache = (params) => { return req("get", "/api/User/flashCa
 
 // 获取受试者列表
 export const subjectList = () => { return server.get("/psyquestioner/subject" ) };
-
-
+// 编辑受试者
+export const subjectEdit = (params,id) => { return server.put( `/psyquestioner/subject/${id}`, params) };
+// 添加受试者
+export const subjectSave = (params) => { return server.post( "/psyquestioner/subject", params) };
+// 删除受试者
+export const subjectDelete = (id) => { return server.delete(`/psyquestioner/subject/${id}`) };
 
 /**
  * 菜单管理

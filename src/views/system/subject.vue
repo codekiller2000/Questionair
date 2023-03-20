@@ -96,7 +96,8 @@
           <el-date-picker
             v-model="editForm.birthday"
             type="datetime"
-            placeholder="选择日期时间">
+            placeholder="选择日期时间"
+            value-format="yyyy-MM-dd">
           </el-date-picker>
         </el-form-item>
 
@@ -167,6 +168,9 @@ import {
   UserChangeDept,
 
   subjectList,
+  subjectEdit,
+  subjectSave,
+  subjectDelete,
 
 } from '../../api/userMG'
 import Pagination from '../../components/Pagination'
@@ -183,19 +187,20 @@ export default {
 
       // 选择问卷的状态
       options: [{
-        value: '0',
+        value: 0,
         label: '未完成'
       }, {
-        value: '1',
+        value: 1,
         label: '进行中'
       }, {
-        value: '2',
+        value: 2,
         label: '已完成'
       }, {
-        value: '3',
+        value: 3,
         label: '已终止'
       },],
-      value: '',
+      value: null,
+
 
       // 编辑与添加
       editForm: {
@@ -203,7 +208,7 @@ export default {
         name: '',
         age:'',
         phone:'',
-        state: '',  //问卷完成状态（0,未完成，1，进行中，2，已完成，3，已终止）
+        state: null,  //问卷完成状态（0,未完成，1，进行中，2，已完成，3，已终止）
         birthday: '',
         gender: '',
         result: '', //诊断的疾病，多个用逗号隔开
@@ -421,14 +426,17 @@ export default {
         }
 
       } else {
-        this.title = '添加用户'
-        this.editForm.id = ''
-        this.editForm.userName = ''
+        this.title = '添加受试者'
+        // this.editForm.id = ''
+
         this.editForm.name = ''
 
         this.editForm.phone = ''
-        this.editForm.email = ''
+        this.editForm.state = ''
         this.editForm.gender = ''
+        this.editForm.result=''
+        this.editForm.birthday=''
+
 
 
 
@@ -444,7 +452,6 @@ export default {
           // 请求方法
 
           let sex=''
-
           if(this.editForm.gender==='女'){
             sex=0
           }
@@ -452,19 +459,34 @@ export default {
             sex=1
           }
 
+          let state=null
+          if(this.editForm.state==='未完成'){
+              state=0
+          }
+          if(this.editForm.state==='进行中'){
+            state=1
+          }
+          if(this.editForm.state==='已完成'){
+            state=2
+          }
+          if(this.editForm.state==='已终止'){
+            state=3
+          }
+
           let obj={
             "name": this.editForm.name,
             "phone": this.editForm.phone,
-            "birthday": this.editForm.email,
+            "birthday": this.editForm.birthday,
             "gender": sex,
             "age": this.editForm.age,
-            "description": this.editForm.description,
+            "result": this.editForm.result,
+            "state":state,
           }
           if(this.title==='修改用户'){
 
-            userEdit(obj,this.editForm.id)
+            subjectEdit(obj,this.editForm.id)
               .then(res => {
-                console.log('修改用户',res)
+                console.log('修改受试者',res)
                 this.editFormVisible = false
                 this.loading = false
                 if (res.data.code==='000000') {
@@ -486,9 +508,9 @@ export default {
                 this.loading = false
                 this.$message.error('保存失败，请稍后再试！')
               })
-          }else if(this.title==='添加用户'){
-            userSave(obj).then(res=>{
-              console.log('添加用户',res)
+          }else if(this.title==='添加受试者'){
+            subjectSave(obj).then(res=>{
+              console.log('添加受试者',res)
               this.editFormVisible = false
               this.loading = false
               if(res.data.code==='000000'){
@@ -598,7 +620,7 @@ export default {
       })
         .then(() => {
           // 删除
-          userDelete(row.id)
+          subjectDelete(row.id)
             .then(res => {
               if (res.data.code==='000000') {
                 this.$message({

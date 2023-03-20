@@ -13,6 +13,8 @@ import index from '@/views/index';
 import QnFill from "../views/QnFill.vue";
 import EditQn from "../views/EditQn.vue";
 import SubQnFill from "../views/SubQnFill.vue";
+import questionTemplate from "../views/questionTemplate/index.vue";
+import questionModule from "../views/questionModule/index.vue";
 
 // 商品管理
 import Goods from '@/views/goods/Goods';
@@ -88,6 +90,21 @@ export default new Router({
         iconCls: 'el-icon-tickets',
         children: [
           {
+            path: '/questionTemplate/index',
+            name: 'questionTemplate',
+            component: questionTemplate,
+            meta: {
+              requireAuth: true
+            }
+          },
+          {
+            path: '/questionModule/index',
+            name: 'questionModule',
+            component: questionModule,
+            meta: {
+              requireAuth: true
+            }
+          },{
             path: '/QnFill',
             name: 'QnFill',
             component: QnFill,
