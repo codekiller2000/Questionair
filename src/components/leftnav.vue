@@ -51,21 +51,21 @@ export default {
               url: 'questionTemplate/index',
               menus: null
             },
-            {
-              menuid: 212,
-              icon: 'icon-cat-skuQuery',
-              menuname: '模块管理',
-              hasThird: 'N',
-              url: 'questionModule/index',
-              menus: null
-            },{
-              menuid: 23,
-              icon: 'icon-cat-skuQuery',
-              menuname: '问题管理',
-              hasThird: 'N',
-              url: 'question/index',
-              menus: null
-            }
+            // {
+            //   menuid: 212,
+            //   icon: 'icon-cat-skuQuery',
+            //   menuname: '模块管理',
+            //   hasThird: 'N',
+            //   url: 'questionModule/index',
+            //   menus: null
+            // },{
+            //   menuid: 23,
+            //   icon: 'icon-cat-skuQuery',
+            //   menuname: '问题管理',
+            //   hasThird: 'N',
+            //   url: 'question/index',
+            //   menus: null
+            // }
           ]
         },
         // {
