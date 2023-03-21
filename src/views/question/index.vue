@@ -32,10 +32,11 @@
       </el-table-column>
       <el-table-column sortable prop="issue" label="问题" width="600" show-overflow-tooltip>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="300">
+      <el-table-column align="center" label="操作" width="350">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleCheck(scope.$index, scope.row)">查看</el-button>
           <el-button size="mini" type="primary" @click="handleUpdate(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" type="primary" @click="openSkipDialog(scope.$index, scope.row)">跳转规则</el-button>
           <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -87,9 +88,6 @@
                        v-model="refIdsForCascader"
                        :props="defaultCascaderProps" ref="refIdsCascader" popper-class="cascader-refIds"></el-cascader>
         </el-form-item>
-        <el-form-item label="跳转规则">
-          <el-button type="primary" round @click="openSkipDialog()">设置</el-button>
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
@@ -119,7 +117,7 @@
       </div>
     </el-dialog>
     <el-dialog title="在此页面设置跳转规则" :visible.sync="skipDialogVisible" width="40%"
-               @click="closeSkipDialog()" id="skipFormDialog">
+               @click="closeSkipDialog()" v-loading="skipLoading" id="skipFormDialog">
       <div style="text-align: center" v-if="!skipRulesForDialog.length">点击 + 号新增一条规则</div>
       <el-divider v-if="skipRulesForDialog.length"></el-divider>
       <el-form v-for="(skip ,i) in skipRulesForDialog" :key="i">
@@ -159,6 +157,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button type="success" icon="el-icon-plus" circle style="float: left" @click="addSkip()"></el-button>
         <el-button type="danger" icon="el-icon-minus" circle style="float: left" @click="minusSkip()"></el-button>
+        <el-button size="small" @click="commitSkip()">保存</el-button>
         <el-button size="small" @click="closeSkipDialog()">关闭</el-button>
         <div style="clear: both"></div>
       </div>
@@ -173,7 +172,7 @@ import {
   deleteQuestion,
   querySimplifiedTree,
   questionList,
-  querySimplifiedTreeForSkip
+  saveSkip
 } from '../../api/question'
 
 export default {
@@ -181,6 +180,7 @@ export default {
     return {
       loading: false, //是显示加载
       editFormLoading: false, //是显示加载
+      skipLoading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       optionDialogVisible: false,
       skipDialogVisible: false,
@@ -198,9 +198,9 @@ export default {
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
         optData: {options: []},
-        refIds: [],
-        skipRules: []
+        refIds: []
       },
+      skipRules: [],
       refIdsForCascader: [],
       skipRulesForDialog: [],
       moduleIdIndexMap: [],
@@ -311,7 +311,6 @@ export default {
         }
         this.loading = true;
         this.editForm.refIds = this.transferMQList2QList(this.refIdsForCascader);
-        this.transfer2Skip();
         if (this.handleStatus === 1) {
           saveQuestion(this.editForm).then(res => {
             this.editFormVisible = false
@@ -400,29 +399,13 @@ export default {
       this.editFormLoading = true;
       querySimplifiedTree(this.templateId).then(res => {
         if (res.data.code === "000000") {
-          this.moduleSimplifiedCascader = res.data.data;
+          this.moduleSimplifiedCascader = res.data.data.data1;
           //  因为cascader需要，需要一个新的map,key为question,value为module,方便根据question找module
           this.createQuestion2ModuleMap();
           //需要上面的q2mMap 所以回显只能写这里
           this.refIdsForCascader = row && row.refIds ? this.transferQList2MQList(row.refIds) : [];
-          if (row && row.skipRules) {
-            this.transfer2SkipCascader(row.skipRules)
-          } else {
-            this.skipRulesForDialog = [];
-          }
-        } else {
-          this.$message.warning(res.data.msg)
-        }
-        this.editFormLoading = false
-      }).catch(err => {
-        console.log(err)
-        this.editFormLoading = false
-        this.editFormVisible = false;
-        this.$message.error('系统错误，操作失败')
-      })
-      querySimplifiedTreeForSkip(this.templateId).then(res => {
-        if (res.data.code === "000000") {
-          let moduleList = res.data.data;
+
+          let moduleList = res.data.data.data2;
           this.moduleSimplifiedCascaderForSkip = moduleList;
           //需要{mid,mindex}和{qid,qindex}的两个map,用于cascader查找options
           let mIdIndexMap = {};
@@ -442,13 +425,52 @@ export default {
         }
         this.editFormLoading = false
       }).catch(err => {
+        console.log(err)
         this.editFormLoading = false
         this.editFormVisible = false;
         this.$message.error('系统错误，操作失败')
       })
     },
-    openSkipDialog() {
+    openSkipDialog(index, row) {
       this.skipDialogVisible = true;
+      this.skipLoading = true;
+      this.queId4Skip = row.id;
+      querySimplifiedTree(this.templateId).then(res => {
+        if (res.data.code === "000000") {
+          this.moduleSimplifiedCascader = res.data.data.data1;
+          //  因为cascader需要，需要一个新的map,key为question,value为module,方便根据question找module
+          this.createQuestion2ModuleMap();
+          //需要上面的q2mMap 所以回显只能写这里
+          if (row && row.skipRules) {
+            this.transfer2SkipCascader(row.skipRules)
+          } else {
+            this.skipRulesForDialog = [];
+          }
+          let moduleList = res.data.data.data2;
+          this.moduleSimplifiedCascaderForSkip = moduleList;
+          //需要{mid,mindex}和{qid,qindex}的两个map,用于cascader查找options
+          let mIdIndexMap = {};
+          let qIdIndexMap = {};
+          for (let i in moduleList) {
+            let module = moduleList[i];
+            mIdIndexMap[module.id] = i;
+            for (let j in module.questions) {
+              let question = module.questions[j];
+              qIdIndexMap[question.id] = j;
+            }
+          }
+          this.moduleIdIndexMap = mIdIndexMap;
+          this.questionIdIndexMap = qIdIndexMap;
+        } else {
+          this.$message.warning(res.data.msg)
+        }
+        this.skipLoading = false;
+      }).catch(err => {
+        console.log(err)
+        this.skipDialogVisible = false;
+        this.skipLoading = false;
+        this.$message.error('系统错误，操作失败')
+      })
     },
     closeSkipDialog() {
       this.skipDialogVisible = false;
@@ -460,6 +482,7 @@ export default {
           let temp = {
             target: s.target[1],
             type: s.type,
+            queId: this.queId4Skip
           };
           let tempCondition = [];
           s.conditionJson.forEach(c => {
@@ -469,7 +492,7 @@ export default {
           tempList.push(temp)
         }
       });
-      this.editForm.skipRules = tempList;
+      this.skipRules = tempList;
     },
     transfer2SkipCascader(skipRules) {
       let tempList = [];
@@ -545,6 +568,24 @@ export default {
       if (this.skipRulesForDialog[i].conditionJson.length > 1) {
         this.skipRulesForDialog[i].conditionJson.splice(j, 1)
       }
+    },
+    commitSkip() {
+      this.skipLoading = true;
+      this.transfer2Skip();
+      saveSkip(this.skipRules).then(res => {
+        if (res.data.code === "000000") {
+          this.getData()
+          this.$message.success("保存成功")
+        } else {
+          this.$message.warning(res.data.msg)
+        }
+        this.skipDialogVisible = false;
+        this.skipLoading = false;
+      }).catch(err => {
+        this.skipDialogVisible = false;
+        this.skipLoading = false;
+        this.$message.error('系统出错，保存失败')
+      })
     }
   }
 }

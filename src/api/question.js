@@ -9,6 +9,10 @@ export const questionList = (moduleId) => {
 export const saveQuestion = (data) => {
   return server.post("/question", data)
 };
+// 保存问题
+export const saveSkip = (data) => {
+  return server.post("/skip/saveBatch", data)
+};
 // 更新问题
 export const updateQuestion = (id, data) => {
   return server.put(`/question/${id}`, data)
