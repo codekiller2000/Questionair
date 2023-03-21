@@ -42,7 +42,7 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="60%" @click="closeDialog" v-loading="dialogLoading">
+               width="60%" @click="closeDialog" v-loading="editFormLoading">
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
         <el-form-item label="编号" prop="questionNo">
@@ -83,14 +83,12 @@
           </span>
         </el-form-item>
         <el-form-item label="参考题目">
-          <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
-                   :props="defaultTreeProps" ref="refIdsTree">
-          </el-tree>
+          <el-cascader size="small" placeholder="参考题目" :options="moduleSimplifiedCascader"
+                       v-model="refIdsForCascader"
+                       :props="defaultCascaderProps" ref="refIdsCascader" popper-class="cascader-refIds"></el-cascader>
         </el-form-item>
         <el-form-item label="跳转规则">
-          <el-tree :data="moduleSimplifiedTree" show-checkbox node-key="id" :default-checked-keys="defaultTreeNodes"
-                   :props="defaultTreeProps" ref="refIdsTree">
-          </el-tree>
+          <el-button type="primary" round @click="openSkipDialog()">设置</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -100,15 +98,14 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog title="在此页面编辑选项" :visible.sync="optionDialogVisible" width="50%" style="text-align: center"
+    <el-dialog title="在此页面编辑选项" :visible.sync="optionDialogVisible" width="50%"
                @click="closeOptionDialog" @close="transferOption()" id="optionFormDialog">
-      <div v-if="!editForm.optData.options.length">点击 + 号编辑选项</div>
+      <div style="text-align: center" v-if="!editForm.optData.options.length">点击 + 号编辑选项</div>
       <el-form v-for="(item ,i) in editForm.optData.options" :key="i" label-width="60px" ref="optionForm">
         <el-form-item :label="`选项${i+1}`">
           <el-input size="small" v-model="item.label" auto-complete="off"
                     placeholder="输入选项文本">
-            <el-input-number size="small" v-model="item.value" step-strictly auto-complete="off"
-                             slot="append"
+            <el-input-number size="small" v-model="item.value" step-strictly auto-complete="off" slot="append"
                              placeholder="取值">
             </el-input-number>
           </el-input>
@@ -121,19 +118,65 @@
         <div style="clear: both"></div>
       </div>
     </el-dialog>
+    <el-dialog title="在此页面设置跳转规则" :visible.sync="skipDialogVisible" width="40%"
+               @click="closeSkipDialog()" id="skipFormDialog">
+      <div style="text-align: center" v-if="!skipRulesForDialog.length">点击 + 号新增一条规则</div>
+      <el-divider v-if="skipRulesForDialog.length"></el-divider>
+      <el-form v-for="(skip ,i) in skipRulesForDialog" :key="i">
+        <el-form-item :label="`${i+1}、符合以下条件时跳转到`">
+          <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascader" v-model="skip.target"
+                       :props="defaultSkipCascaderProps" ref="" popper-class="cascader-skip"></el-cascader>
+        </el-form-item>
+        <el-form-item v-for="(condition,j) in skip.conditionJson" :key="j">
+          <!--          condition.questionId是[mid,qid]的数组-->
+          <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascaderForSkip"
+                       v-model="condition.questionId"
+                       :props="defaultSkipCascaderProps" popper-class="cascader-skip-condition"></el-cascader>
+          <el-select v-model="condition.value" size="small" placeholder="请选择">
+            <el-option
+              v-for="(option, k) in condition.questionId && condition.questionId.length === 2 ? moduleSimplifiedCascaderForSkip[moduleIdIndexMap[condition.questionId[0]]].questions[questionIdIndexMap[condition.questionId[1]]].optData.options:[{}]"
+              :label="option.label" :key="k" :value="option.value"></el-option>
+          </el-select>
+          <div style="width: 180px;float: right">
+            <el-button size="small" type="text">
+              <i style="color: #ff4949;font-size: 24px" class="el-icon-circle-plus-outline"
+                 @click="addCondition(i)"></i>
+            </el-button>
+            <el-button size="small" type="text">
+              <i style="color: #409eff;font-size: 24px" class="el-icon-remove-outline" @click="minusCondition(i,j)"></i>
+            </el-button>
+          </div>
+        </el-form-item>
+        <el-divider></el-divider>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="success" icon="el-icon-plus" circle style="float: left" @click="addSkip()"></el-button>
+        <el-button type="danger" icon="el-icon-minus" circle style="float: left" @click="minusSkip()"></el-button>
+        <el-button size="small" @click="closeSkipDialog()">关闭</el-button>
+        <div style="clear: both"></div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {saveQuestion, updateQuestion, deleteQuestion, querySimplifiedTree, questionList} from '../../api/question'
+import {
+  saveQuestion,
+  updateQuestion,
+  deleteQuestion,
+  querySimplifiedTree,
+  questionList,
+  querySimplifiedCascaderTree, querySimplifiedTreeForSkip
+} from '../../api/question'
 
 export default {
   data() {
     return {
       loading: false, //是显示加载
-      dialogLoading: false, //是显示加载
+      editFormLoading: false, //是显示加载
       editFormVisible: false, //控制编辑页面显示与隐藏
       optionDialogVisible: false,
+      skipDialogVisible: false,
       handleStatus: 3,
       templateId: '',
       questionId: '',
@@ -148,14 +191,27 @@ export default {
         answers: '',//该题目由谁做答 todo
         serialNum: '',//排序序号
         optData: {options: []},
-        refIds: []
+        refIds: [],
+        skipRules: []
       },
-      defaultTreeNodes: [],
-      defaultTreeProps: {
+      refIdsForCascader: [],
+      skipRulesForDialog: [],
+      moduleIdIndexMap: [],
+      questionIdIndexMap: [],
+      defaultCascaderProps: {
         label: 'no',
-        children: 'questions'
+        children: 'questions',
+        multiple: true,
+        value: 'id'
       },
-      moduleSimplifiedTree: [],
+      defaultSkipCascaderProps: {
+        label: 'no',
+        children: 'questions',
+        value: 'id'
+      },
+      moduleSimplifiedCascader: [],
+      //只有单选，包含选项
+      moduleSimplifiedCascaderForSkip: [],
       // rules表单验证
       rules: {
         questionNo: [
@@ -217,50 +273,27 @@ export default {
     },
     //显示查看界面
     handleCheck: function (index, row) {
-      this.questionId = row.id;
-      this.editFormVisible = true
       this.handleStatus = 3;
-      this.editForm.questionNo = row.questionNo;
-      this.editForm.queType = row.queType ? row.queType + '' : '';
-      this.editForm.optType = row.optType;
-      this.editForm.issue = row.issue;
-      this.editForm.note = row.note;
-      this.editForm.answers = row.answers ? row.answers + '' : '';
-      this.editForm.serialNum = row.serialNum;
-      //深拷贝
-      this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
-      this.dialogOpened(row.refIds);
+      //先请求服务器数据
+      this.editFormOpened(row);
+      //然后填充
+      this.loadEditForm(row);
     },
     //显示添加界面
     handleSave: function () {
-      this.questionId = '';
-      this.editFormVisible = true
       this.handleStatus = 1;
-      this.editForm.questionNo = '';
-      this.editForm.queType = '';
-      this.editForm.optType = '';
-      this.editForm.issue = '';
-      this.editForm.note = '';
-      this.editForm.answers = '';
-      this.editForm.serialNum = '';
-      this.editForm.optData.options = [];
-      this.dialogOpened();
+      //先请求服务器数据
+      this.editFormOpened();
+      //然后填充
+      this.loadEditForm();
     },
     //显示编辑界面
     handleUpdate: function (index, row) {
-      this.questionId = row.id;
-      this.editFormVisible = true
       this.handleStatus = 2;
-      this.editForm.questionNo = row.questionNo;
-      this.editForm.queType = row.queType ? row.queType + '' : '';
-      this.editForm.optType = row.optType;
-      this.editForm.issue = row.issue;
-      this.editForm.note = row.note;
-      this.editForm.answers = row.answers ? row.answers + '' : '';
-      this.editForm.serialNum = row.serialNum;
-      //深拷贝
-      this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
-      this.dialogOpened(row.refIds);
+      //先请求服务器数据
+      this.editFormOpened(row);
+      //然后填充
+      this.loadEditForm(row);
     },
     // 编辑、增加页面保存方法
     submitForm(formRefsName) {
@@ -269,7 +302,8 @@ export default {
           return false;
         }
         this.loading = true;
-        this.editForm.refIds = this.$refs["refIdsTree"].getCheckedKeys(true);
+        this.editForm.refIds = this.transferMQList2QList(this.refIdsForCascader);
+        this.transfer2Skip();
         if (this.handleStatus === 1) {
           saveQuestion(this.editForm).then(res => {
             this.editFormVisible = false
@@ -323,7 +357,7 @@ export default {
           this.$message.error('系统错误，操作失败')
         })
       }).catch(err => {
-        console.log(err)
+        //这个只是点击了取消
       })
     },
     closeDialog() {
@@ -353,26 +387,154 @@ export default {
       })
       this.editForm.optData.options = arr;
     },
-    //defaultTreeNodes默认值
-    dialogOpened(defaultTreeNodes) {
-      this.dialogLoading = true;
+    //开启editFormDialog前
+    editFormOpened(row) {
+      this.editFormLoading = true;
       querySimplifiedTree(this.templateId).then(res => {
         if (res.data.code === "000000") {
-          this.moduleSimplifiedTree = res.data.data;
-          if (defaultTreeNodes) {
-            this.defaultTreeNodes = defaultTreeNodes;
+          this.moduleSimplifiedCascader = res.data.data;
+          //  因为cascader需要，需要一个新的map,key为question,value为module,方便根据question找module
+          this.createQuestion2ModuleMap();
+          //需要上面的q2mMap 所以回显只能写这里
+          this.refIdsForCascader = row && row.refIds ? this.transferQList2MQList(row.refIds) : [];
+          if (row && row.skipRules) {
+            this.transfer2SkipCascader(row.skipRules)
           } else {
-            this.defaultTreeNodes = [];
+            this.skipRulesForDialog = [];
           }
         } else {
           this.$message.warning(res.data.msg)
         }
-        this.dialogLoading = false
+        this.editFormLoading = false
       }).catch(err => {
-        this.dialogLoading = false
+        console.log(err)
+        this.editFormLoading = false
         this.editFormVisible = false;
         this.$message.error('系统错误，操作失败')
       })
+      querySimplifiedTreeForSkip(this.templateId).then(res => {
+        if (res.data.code === "000000") {
+          let moduleList = res.data.data;
+          this.moduleSimplifiedCascaderForSkip = moduleList;
+          //需要{mid,mindex}和{qid,qindex}的两个map,用于cascader查找options
+          let mIdIndexMap = {};
+          let qIdIndexMap = {};
+          for (let i in moduleList) {
+            let module = moduleList[i];
+            mIdIndexMap[module.id] = i;
+            for (let j in module.questions) {
+              let question = module.questions[j];
+              qIdIndexMap[question.id] = j;
+            }
+          }
+          this.moduleIdIndexMap = mIdIndexMap;
+          this.questionIdIndexMap = qIdIndexMap;
+        } else {
+          this.$message.warning(res.data.msg)
+        }
+        this.editFormLoading = false
+      }).catch(err => {
+        this.editFormLoading = false
+        this.editFormVisible = false;
+        this.$message.error('系统错误，操作失败')
+      })
+    },
+    openSkipDialog() {
+      this.skipDialogVisible = true;
+    },
+    closeSkipDialog() {
+      this.skipDialogVisible = false;
+    },
+    transfer2Skip() {
+      let tempList = [];
+      this.skipRulesForDialog.forEach(s => {
+        if (s.target && s.target.length === 2) {
+          let temp = {
+            target: s.target[1]
+          };
+          let tempCondition = [];
+          s.conditionJson.forEach(c => {
+            tempCondition.push({value: c.value, questionId: c.questionId[1]})
+          })
+          temp.conditionJson = tempCondition;
+          tempList.push(temp)
+        }
+      });
+      this.editForm.skipRules = tempList;
+    },
+    transfer2SkipCascader(skipRules) {
+      let tempList = [];
+      skipRules.forEach(s => {
+        let temp = {
+          target: [this.question2ModuleMap[s.target], s.target]
+        };
+        let tempCondition = [];
+        s.conditionJson.forEach(c => {
+          tempCondition.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
+        })
+        temp.conditionJson = tempCondition;
+        tempList.push(temp)
+      });
+      this.skipRulesForDialog = tempList;
+    },
+    loadEditForm(row) {
+      if (row) {
+        this.questionId = row.id;
+        this.editForm.questionNo = row.questionNo;
+        this.editForm.queType = row.queType ? row.queType + '' : '';
+        this.editForm.optType = row.optType;
+        this.editForm.issue = row.issue;
+        this.editForm.note = row.note;
+        this.editForm.answers = row.answers ? row.answers + '' : '';
+        this.editForm.serialNum = row.serialNum;
+        //深拷贝
+        this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
+        //还有一个refIds skiprules，因为需要异步请求的数据，所以写在了异步请求里
+      } else {
+        this.questionId = '';
+        this.editForm.questionNo = '';
+        this.editForm.queType = '';
+        this.editForm.optType = '';
+        this.editForm.issue = '';
+        this.editForm.note = '';
+        this.editForm.answers = '';
+        this.editForm.serialNum = '';
+        this.editForm.optData.options = [];
+      }
+      this.editFormVisible = true;
+    },
+    // elementUI的cascader必须要上一级的id，所以在这转换
+    transferQList2MQList(qList) {
+      let mqList = [];
+      qList.forEach(q => mqList.push([this.question2ModuleMap[q], q]));
+      return mqList;
+    },
+    transferMQList2QList(mqList) {
+      let qList = [];
+      mqList.forEach(mq => qList.push(mq[1]));
+      return qList;
+    },
+    createQuestion2ModuleMap() {
+      let q2mMap = {};
+      let mqList = this.moduleSimplifiedCascader;
+      mqList.forEach(m => {
+        m.questions.forEach(q => q2mMap[q.id] = m.id)
+      })
+      this.question2ModuleMap = q2mMap;
+    },
+    addSkip() {
+      this.skipRulesForDialog.push({conditionJson: [{}]})
+    },
+    minusSkip() {
+      this.skipRulesForDialog.pop()
+    },
+    addCondition(i) {
+      this.skipRulesForDialog[i].conditionJson.push({})
+    },
+    minusCondition(i, j) {
+      if (this.skipRulesForDialog[i].conditionJson.length > 1) {
+        this.skipRulesForDialog[i].conditionJson.splice(j, 1)
+      }
     }
   }
 }
@@ -385,5 +547,25 @@ export default {
 
 #optionFormDialog .el-dialog__body {
   padding: 30px 20px 0 20px;
+}
+
+.cascader-refIds .el-cascader-panel .el-scrollbar:first-child .el-checkbox {
+  display: none;
+}
+
+#skipFormDialog .el-dialog__header, #optionFormDialog .el-dialog__header {
+  text-align: center;
+}
+
+#skipFormDialog .el-input {
+  width: 180px;
+}
+
+#skipFormDialog .el-form-item {
+  margin-bottom: 0;
+}
+
+#skipFormDialog .el-button--text {
+  margin-left: 10px;
 }
 </style>

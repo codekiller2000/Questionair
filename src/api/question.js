@@ -7,7 +7,7 @@ export const questionList = (moduleId) => {
 };
 // 保存问题
 export const saveQuestion = (data) => {
-  return server.post("/question/create", data)
+  return server.post("/question", data)
 };
 // 更新问题
 export const updateQuestion = (id, data) => {
@@ -21,4 +21,9 @@ export const deleteQuestion = (id) => {
 export const querySimplifiedTree = (templateId) => {
   templateId = 't10001';//todo 要删
   return server.get(`/psyquestioner/module/querySimplifiedTree/${templateId}`)
+};
+//查找 模块-问题的(id,no)树形结构
+export const querySimplifiedTreeForSkip = (templateId) => {
+  templateId = 't10001';//todo 要删
+  return server.get(`/psyquestioner/module/querySimplifiedTreeForSkip/${templateId}`)
 };
