@@ -8,17 +8,21 @@
       <el-form-item prop="password">
         <el-input type="password" v-model="ruleForm.password" auto-complete="off" placeholder="密码"></el-input>
       </el-form-item>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item prop="code">
-            <el-input type="text" v-model="ruleForm.code" auto-complete="off" placeholder="图形验证码" @keyup.enter.native="submitForm('ruleForm')"></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12" class="code-box">
-          <img :src="ruleForm.codeimg" alt="" class="codeimg" @click="getcode()">
-        </el-col>
-      </el-row>
-      <el-checkbox class="remember" v-model="rememberpwd">记住密码</el-checkbox>
+<!--      <el-row>-->
+<!--&lt;!&ndash;        <el-col :span="12">&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-form-item prop="code">&ndash;&gt;-->
+<!--&lt;!&ndash;            <el-input type="text" v-model="ruleForm.code" auto-complete="off" placeholder="图形验证码" @keyup.enter.native="submitForm('ruleForm')"></el-input>&ndash;&gt;-->
+<!--&lt;!&ndash;          </el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;        </el-col>        <el-col :span="12">&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-form-item prop="code">&ndash;&gt;-->
+<!--&lt;!&ndash;            <el-input type="text" v-model="ruleForm.code" auto-complete="off" placeholder="图形验证码" @keyup.enter.native="submitForm('ruleForm')"></el-input>&ndash;&gt;-->
+<!--&lt;!&ndash;          </el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;        </el-col>&ndash;&gt;-->
+<!--&lt;!&ndash;        <el-col :span="12" class="code-box">&ndash;&gt;-->
+<!--&lt;!&ndash;          <img :src="ruleForm.codeimg" alt="" class="codeimg" @click="getcode()">&ndash;&gt;-->
+<!--&lt;!&ndash;        </el-col>&ndash;&gt;-->
+<!--      </el-row>-->
+<!--      <el-checkbox class="remember" v-model="rememberpwd">记住密码</el-checkbox>-->
       <el-form-item style="width:100%;">
         <el-button type="primary" style="width:100%;" @click="submitForm('ruleForm')" :loading="logining">登录</el-button>
       </el-form-item>
@@ -36,12 +40,12 @@ export default {
       //定义loading默认为false
       logining: false,
       // 记住密码
-      rememberpwd: false,
+      // rememberpwd: false,
       ruleForm: {
         //username和password默认为空
         username: '',
         password: '',
-        code: '',
+        // code: '',
         randomStr: '',
         codeimg: ''
       },
@@ -49,7 +53,7 @@ export default {
       rules: {
         username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+        // code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
       }
     }
   },
@@ -62,28 +66,28 @@ export default {
     // 获取图形验证码 todo
     // this.getcode()
     // 获取存在本地的用户名密码
-    this.getuserpwd()
+    // this.getuserpwd()
   },
   // 里面的函数只有调用才会执行
   methods: {
     // 获取用户名密码
-    getuserpwd() {
-      // if (getCookie('user') != '' && getCookie('pwd') != '') {
-      //   this.ruleForm.username = getCookie('user')
-      //   this.ruleForm.password = getCookie('pwd')
-      //   this.rememberpwd = true
-      // }
-
-
-      // getCookie('pwd') != ''
-      if ((sessionStorage.getItem("userInfo")) !== '') {
-        // console.log(22222222222222,sessionStorage.getItem("userInfo"))
-        this.ruleForm.username = sessionStorage.getItem("userInfo")
-
-        this.rememberpwd = true
-      }
-
-    },
+    // getuserpwd() {
+    //   // if (getCookie('user') != '' && getCookie('pwd') != '') {
+    //   //   this.ruleForm.username = getCookie('user')
+    //   //   this.ruleForm.password = getCookie('pwd')
+    //   //   this.rememberpwd = true
+    //   // }
+    //
+    //
+    //   // getCookie('pwd') != ''
+    //   // if ((sessionStorage.getItem("userInfo")) !== '') {
+    //   //   // console.log(22222222222222,sessionStorage.getItem("userInfo"))
+    //   //   this.ruleForm.username = sessionStorage.getItem("userInfo")
+    //   //
+    //   //   this.rememberpwd = true
+    //   // }
+    //
+    // },
     //获取info列表
     submitForm(formName) {
       /*this.$refs[formName].validate(valid => {*/

@@ -202,7 +202,7 @@ export default {
       // 获取用户列表
       moduleListById({"templateId":this.templateId}).then(res => {
         this.loading = false
-        console.log(res)
+        // console.log(res)
         if (res.data.code!=='000000') {
           // console.log(11111111111111111)
           this.$message({
