@@ -166,7 +166,7 @@ import {
   deleteQuestion,
   querySimplifiedTree,
   questionList,
-  querySimplifiedCascaderTree, querySimplifiedTreeForSkip
+  querySimplifiedTreeForSkip
 } from '../../api/question'
 
 export default {
@@ -239,6 +239,7 @@ export default {
     this.editForm.moduleNo = this.$route.params.moduleNo;
     //返回上一页需要templateId
     this.templateId = this.$route.params.templateId;
+    console.log(this.editForm.moduleId,this.editForm.moduleNo,this.templateId)
   },
   methods: {
     backToModule() {
@@ -481,11 +482,11 @@ export default {
       if (row) {
         this.questionId = row.id;
         this.editForm.questionNo = row.questionNo;
-        this.editForm.queType = row.queType ? row.queType + '' : '';
+        this.editForm.queType = row.queType || row.queType === 0 ? row.queType + '' : '';
         this.editForm.optType = row.optType;
         this.editForm.issue = row.issue;
         this.editForm.note = row.note;
-        this.editForm.answers = row.answers ? row.answers + '' : '';
+        this.editForm.answers = row.answers || row.answers === 0 ? row.answers + '' : '';
         this.editForm.serialNum = row.serialNum;
         //深拷贝
         this.editForm.optData.options = row.optData && row.optData.options ? JSON.parse(JSON.stringify(row.optData.options)) : {}
