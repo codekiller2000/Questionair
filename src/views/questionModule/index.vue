@@ -11,9 +11,9 @@
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleSave()">添加</el-button>
       </el-form-item>
-      <!--      <el-form-item style="float: right">-->
-      <!--        <el-button size="small" icon="el-icon-back" @click="backToModule()">返回</el-button>-->
-      <!--      </el-form-item>-->
+      <el-form-item style="float: right">
+        <el-button size="small" icon="el-icon-back" @click="backToModule()">返回</el-button>
+      </el-form-item>
       <div style="clear: both"></div>
     </el-form>
     <!--列表-->
@@ -263,6 +263,13 @@ export default {
       this.editForm.serialNum=''
 
     },
+
+    backToModule(){
+      this.$router.push({
+        name:'questionTemplate'
+      })
+    },
+
     //显示编辑界面
     handleUpdate: function (index, row) {
       this.editForm.templateId = row.templateId;
