@@ -37,7 +37,7 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="60%" @click="closeDialog" @close="dialogClosed()">
+               width="60%" @click="closeDialog" >
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
 

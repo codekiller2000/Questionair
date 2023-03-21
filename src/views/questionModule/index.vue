@@ -40,7 +40,7 @@
     </el-table>
     <!-- 编辑界面 -->
     <el-dialog :title="handleStatus === 1?'添加':handleStatus === 2?'修改':'查看'" :visible.sync="editFormVisible"
-               width="60%" @click="closeDialog" @close="dialogClosed()">
+               width="60%" @click="closeDialog" >
       <el-form label-width="120px" :model="editForm" :rules="rules" ref="editForm">
         <!--prop用作检索rules校验规则-->
 
@@ -65,8 +65,14 @@
         </el-form-item>
 
         <el-form-item label="是否排序" prop="sorted">
-          <el-input size="small" v-model="editForm.sorted" auto-complete="off"
-                    placeholder="输入模块名称"></el-input>
+
+          <el-radio v-model="editForm.sorted" :label=true>是</el-radio>
+          <el-radio v-model="editForm.sorted" :label=false>否</el-radio>
+
+<!--          <el-radio-group v-model="editForm.sorted">-->
+<!--            <el-radio :label="true">是</el-radio>-->
+<!--            <el-radio :label="false">否</el-radio>-->
+<!--          </el-radio-group>-->
         </el-form-item>
 
         <el-form-item label="排序编号" prop="serialNum">
@@ -107,7 +113,7 @@ export default {
         moduleName:'',
         moduleNo:'',
         description:'',
-        sorted:null,
+        sorted:true,
         serialNum:null,
       },
       // rules表单验证
@@ -249,6 +255,9 @@ export default {
       this.editForm.moduleNo=row.moduleNo
       this.editForm.sorted=row.sorted
       this.editForm.serialNum=row.serialNum
+
+      console.log(this.editForm)
+
     },
     //显示添加界面
     handleSave: function () {
@@ -259,7 +268,7 @@ export default {
       this.editForm.moduleName=''
       this.editForm.moduleNo=''
       this.editForm.description = '';
-      this.editForm.sorted=''
+      this.editForm.sorted=null;
       this.editForm.serialNum=''
 
     },
@@ -348,7 +357,7 @@ export default {
       this.$router.push({
         name:'question',
         params:{
-          moduleId:row.moduleId,
+          moduleId:row.id,
           moduleNo:row.moduleNo,
           templateId:this.templateId,
         }

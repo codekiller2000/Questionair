@@ -240,12 +240,14 @@ export default {
     }
   },
   created() {
-    this.getData();
+
     //本页需要moduleId/moduleNo
     this.editForm.moduleId = this.$route.params.moduleId;
     this.editForm.moduleNo = this.$route.params.moduleNo;
     //返回上一页需要templateId
     this.templateId = this.$route.params.templateId;
+
+    this.getData();
   },
   methods: {
     backToModule() {
