@@ -246,7 +246,6 @@ export default {
     this.editForm.moduleNo = this.$route.params.moduleNo;
     //返回上一页需要templateId
     this.templateId = this.$route.params.templateId;
-    console.log(this.editForm.moduleId, this.editForm.moduleNo, this.templateId)
   },
   methods: {
     backToModule() {
