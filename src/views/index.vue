@@ -58,6 +58,8 @@ export default {
         }, 300)
       }
     })
+
+    this.$router.push('/questionTemplate/index')
   },
   beforeUpdate() {},
   // 挂载前状态(里面是操作)

@@ -128,7 +128,7 @@ export default new Router({
             }
           },{
             path: '/question/index',
-            name: '问ti管理',
+            name: 'question',
             component: Question,
             meta: {
                 requireAuth: true

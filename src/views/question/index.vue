@@ -187,7 +187,7 @@ export default {
   methods: {
     backToModule() {
       this.$router.push({
-        path: '/EditQn',
+        name: 'questionModule',
         params: {
           templateId: this.templateId
         }
@@ -195,7 +195,7 @@ export default {
     },
     backToTemplate() {
       this.$router.push({
-        path: '/QnFill'
+        path: '/questionTemplate/index'
       })
     },
     // 不分页获取列表
