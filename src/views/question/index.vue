@@ -126,6 +126,13 @@
         <el-form-item :label="`${i+1}、符合以下条件时跳转到`">
           <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascader" v-model="skip.target"
                        :props="defaultSkipCascaderProps" ref="" popper-class="cascader-skip"></el-cascader>
+          <el-select v-model="skip.type" size="small" placeholder="请选择">
+            <el-option label="跳转至题目" value="0"></el-option>
+            <el-option label="跳转至诊断框" value="1"></el-option>
+            <el-option label="跳转至子问题" value="2"></el-option>
+            <el-option label="跳转至模块" value="3"></el-option>
+            <el-option label="跳转至诊断问题" value="4"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item v-for="(condition,j) in skip.conditionJson" :key="j">
           <!--          condition.questionId是[mid,qid]的数组-->
@@ -239,7 +246,7 @@ export default {
     this.editForm.moduleNo = this.$route.params.moduleNo;
     //返回上一页需要templateId
     this.templateId = this.$route.params.templateId;
-    console.log(this.editForm.moduleId,this.editForm.moduleNo,this.templateId)
+    console.log(this.editForm.moduleId, this.editForm.moduleNo, this.templateId)
   },
   methods: {
     backToModule() {
@@ -451,7 +458,8 @@ export default {
       this.skipRulesForDialog.forEach(s => {
         if (s.target && s.target.length === 2) {
           let temp = {
-            target: s.target[1]
+            target: s.target[1],
+            type: s.type,
           };
           let tempCondition = [];
           s.conditionJson.forEach(c => {
@@ -467,7 +475,8 @@ export default {
       let tempList = [];
       skipRules.forEach(s => {
         let temp = {
-          target: [this.question2ModuleMap[s.target], s.target]
+          target: [this.question2ModuleMap[s.target], s.target],
+          type: s.type
         };
         let tempCondition = [];
         s.conditionJson.forEach(c => {
