@@ -2,7 +2,7 @@
   <div>
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item>首页</el-breadcrumb-item>
       <el-breadcrumb-item><a href="javascript:void(0)" @click="backToTemplate()">模板管理</a></el-breadcrumb-item>
       <el-breadcrumb-item><a href="javascript:void(0)" @click="backToModule()">模块管理</a></el-breadcrumb-item>
       <el-breadcrumb-item>问题管理</el-breadcrumb-item>
@@ -124,7 +124,7 @@
         <el-form-item :label="`${i+1}、符合以下条件时跳转到`">
           <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascader" v-model="skip.target"
                        :props="defaultSkipCascaderProps" ref="" popper-class="cascader-skip"></el-cascader>
-          <el-select v-model="skip.type" size="small" placeholder="请选择类型">
+          <el-select v-model="skip.type" @change="skipTypeChanged(skip)" size="small" placeholder="请选择类型">
             <el-option label="按各题选项跳转" value="1"></el-option>
             <el-option label="按答题分数跳转" value="2"></el-option>
             <el-option label="按选中数量跳转" value="3"></el-option>
@@ -474,24 +474,37 @@ export default {
     closeSkipDialog() {
       this.skipDialogVisible = false;
     },
+    //如果参数校验通过，则返回true
     transfer2Skip() {
       let tempList = [];
-      this.skipRulesForDialog.forEach(s => {
-        if (s.target && s.target.length === 2) {
+      for (let i in this.skipRulesForDialog) {
+        let s = this.skipRulesForDialog[i];
+        if (s.target && s.target.length === 2 && s.type) {
           let temp = {
             target: s.target[1],
             type: s.type,
             queId: this.queId4Skip
           };
-          let tempConditions = [];
-          s.conditionJson.conditions.forEach(c => {
-            tempConditions.push({value: c.value, questionId: c.questionId[1]})
-          })
-          temp.conditionJson = {"conditions": tempConditions};
+          if (s.type === "1") {
+            let tempConditions = [];
+            for (let i in s.conditionJson.conditions) {
+              let c = s.conditionJson.conditions[i];
+              if (!c.value || !c.questionId[1]) {
+                return false;
+              }
+              tempConditions.push({value: c.value, questionId: c.questionId[1]})
+            }
+            temp.conditionJson = {"conditions": tempConditions};
+          } else if (s.type === "2") {
+          } else {
+          }
           tempList.push(temp)
+        } else {
+          return false;
         }
-      });
+      }
       this.skipRules = tempList;
+      return true;
     },
     transfer2SkipCascader(skipRules) {
       let tempList = [];
@@ -500,11 +513,17 @@ export default {
           target: [this.question2ModuleMap[s.target], s.target],
           type: s.type + ''
         };
-        let tempConditions = [];
-        s.conditionJson.conditions.forEach(c => {
-          tempConditions.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
-        })
-        temp.conditionJson = {"conditions": tempConditions};
+        if (s.type === 1) {
+          let tempConditions = [];
+          s.conditionJson.conditions.forEach(c => {
+            tempConditions.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
+          })
+          temp.conditionJson = {"conditions": tempConditions};
+        } else if (s.type === 2) {
+
+        } else {
+
+        }
         tempList.push(temp)
       });
       this.skipRulesForDialog = tempList;
@@ -555,7 +574,7 @@ export default {
       this.question2ModuleMap = q2mMap;
     },
     addSkip() {
-      this.skipRulesForDialog.push({conditionJson: {conditions: [{}]}})
+      this.skipRulesForDialog.push({conditionJson: {conditions: [{}], options: [], questions: [], count: 0, score: 0}})
     },
     minusSkip() {
       this.skipRulesForDialog.pop()
@@ -570,7 +589,12 @@ export default {
     },
     commitSkip() {
       this.skipLoading = true;
-      this.transfer2Skip();
+      let isValid = this.transfer2Skip();
+      if (!isValid) {
+        this.$message.warning("未填写必填项");
+        this.skipLoading = false;
+        return;
+      }
       saveSkip(this.skipRules).then(res => {
         if (res.data.code === "000000") {
           this.getData()
@@ -585,6 +609,15 @@ export default {
         this.skipLoading = false;
         this.$message.error('系统出错，保存失败')
       })
+    },
+    skipTypeChanged(skip) {
+      if (skip.type === '1') {
+        skip = [{conditionJson: {conditions: [{}]}}];
+      } else if (skip.type === '2') {
+        skip = [{conditionJson: {options: [{}], count: 0}}];
+      } else {
+        skip = [{conditionJson: {questions: [{}], score: 0}}];
+      }
     }
   }
 }
