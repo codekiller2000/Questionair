@@ -124,15 +124,13 @@
         <el-form-item :label="`${i+1}、符合以下条件时跳转到`">
           <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascader" v-model="skip.target"
                        :props="defaultSkipCascaderProps" ref="" popper-class="cascader-skip"></el-cascader>
-          <el-select v-model="skip.type" size="small" placeholder="请选择">
-            <el-option label="跳转至题目" value="0"></el-option>
-            <el-option label="跳转至诊断框" value="1"></el-option>
-            <el-option label="跳转至子问题" value="2"></el-option>
-            <el-option label="跳转至模块" value="3"></el-option>
-            <el-option label="跳转至诊断问题" value="4"></el-option>
+          <el-select v-model="skip.type" size="small" placeholder="请选择类型">
+            <el-option label="按各题选项跳转" value="1"></el-option>
+            <el-option label="按答题分数跳转" value="2"></el-option>
+            <el-option label="按选中数量跳转" value="3"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item v-for="(condition,j) in skip.conditionJson" :key="j">
+        <el-form-item v-if="skip.type === '1'" v-for="(condition,j) in skip.conditionJson.conditions" :key="j">
           <!--          condition.questionId是[mid,qid]的数组-->
           <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascaderForSkip"
                        v-model="condition.questionId"
@@ -200,7 +198,7 @@ export default {
         optData: {options: []},
         refIds: []
       },
-      skipRules: [],
+      skipRules: {},
       refIdsForCascader: [],
       skipRulesForDialog: [],
       moduleIdIndexMap: [],
@@ -485,11 +483,11 @@ export default {
             type: s.type,
             queId: this.queId4Skip
           };
-          let tempCondition = [];
-          s.conditionJson.forEach(c => {
-            tempCondition.push({value: c.value, questionId: c.questionId[1]})
+          let tempConditions = [];
+          s.conditionJson.conditions.forEach(c => {
+            tempConditions.push({value: c.value, questionId: c.questionId[1]})
           })
-          temp.conditionJson = tempCondition;
+          temp.conditionJson = {"conditions": tempConditions};
           tempList.push(temp)
         }
       });
@@ -500,13 +498,13 @@ export default {
       skipRules.forEach(s => {
         let temp = {
           target: [this.question2ModuleMap[s.target], s.target],
-          type: s.type
+          type: s.type + ''
         };
-        let tempCondition = [];
-        s.conditionJson.forEach(c => {
-          tempCondition.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
+        let tempConditions = [];
+        s.conditionJson.conditions.forEach(c => {
+          tempConditions.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
         })
-        temp.conditionJson = tempCondition;
+        temp.conditionJson = {"conditions": tempConditions};
         tempList.push(temp)
       });
       this.skipRulesForDialog = tempList;
@@ -557,17 +555,17 @@ export default {
       this.question2ModuleMap = q2mMap;
     },
     addSkip() {
-      this.skipRulesForDialog.push({conditionJson: [{}]})
+      this.skipRulesForDialog.push({conditionJson: {conditions: [{}]}})
     },
     minusSkip() {
       this.skipRulesForDialog.pop()
     },
     addCondition(i) {
-      this.skipRulesForDialog[i].conditionJson.push({})
+      this.skipRulesForDialog[i].conditionJson.conditions.push({})
     },
     minusCondition(i, j) {
-      if (this.skipRulesForDialog[i].conditionJson.length > 1) {
-        this.skipRulesForDialog[i].conditionJson.splice(j, 1)
+      if (this.skipRulesForDialog[i].conditionJson.conditions.length > 1) {
+        this.skipRulesForDialog[i].conditionJson.conditions.splice(j, 1)
       }
     },
     commitSkip() {
