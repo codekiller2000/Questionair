@@ -86,7 +86,7 @@
         <el-form-item label="参考题目">
           <el-cascader size="small" placeholder="参考题目" :options="moduleSimplifiedCascader"
                        v-model="refIdsForCascader"
-                       :props="defaultCascaderProps" ref="refIdsCascader" popper-class="cascader-refIds"></el-cascader>
+                       :props="defaultCascaderProps" ref="refIdsCascader" popper-class="cascader-multi"></el-cascader>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -149,6 +149,16 @@
               <i style="color: #409eff;font-size: 24px" class="el-icon-remove-outline" @click="minusCondition(i,j)"></i>
             </el-button>
           </div>
+        </el-form-item>
+        <el-form-item v-if="skip.type === '2'">
+          <!--          questions是questionId的数组-->
+          <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascaderForSkip"
+                       v-model="skip.conditionJson.questions" :props="defaultCascaderProps"
+                       popper-class="cascader-multi"></el-cascader>
+          <span style="padding: 0 0 0 20px">分数应达到</span>
+          <el-input-number size="small" v-model="skip.conditionJson.score" step-strictly auto-complete="off"
+                           placeholder="取值">
+          </el-input-number>
         </el-form-item>
         <el-divider></el-divider>
       </el-form>
@@ -485,10 +495,11 @@ export default {
             type: s.type,
             queId: this.queId4Skip
           };
+          let cj = s.conditionJson;
           if (s.type === "1") {
             let tempConditions = [];
-            for (let i in s.conditionJson.conditions) {
-              let c = s.conditionJson.conditions[i];
+            for (let i in cj.conditions) {
+              let c = cj.conditions[i];
               if (!c.value || !c.questionId[1]) {
                 return false;
               }
@@ -496,6 +507,15 @@ export default {
             }
             temp.conditionJson = {"conditions": tempConditions};
           } else if (s.type === "2") {
+            if (!cj.questions || cj.questions.length === 0 || (!cj.score && cj.score !== 0)) {
+              return false;
+            }
+            let tempQuestions = [];
+            for (let i in cj.questions) {
+              let q = cj.questions[i];
+              tempQuestions.push(q[1]);
+            }
+            temp.conditionJson = {"questions": tempQuestions, "score": cj.score};
           } else {
           }
           tempList.push(temp)
@@ -513,14 +533,19 @@ export default {
           target: [this.question2ModuleMap[s.target], s.target],
           type: s.type + ''
         };
+        let cj = s.conditionJson;
         if (s.type === 1) {
           let tempConditions = [];
-          s.conditionJson.conditions.forEach(c => {
+          cj.conditions.forEach(c => {
             tempConditions.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
           })
           temp.conditionJson = {"conditions": tempConditions};
         } else if (s.type === 2) {
-
+          let tempQuestions = [];
+          cj.questions.forEach(q => {
+            tempQuestions.push([this.question2ModuleMap[q], q]);
+          })
+          temp.conditionJson = {"questions": tempQuestions, "score": cj.score};
         } else {
 
         }
@@ -614,9 +639,9 @@ export default {
       if (skip.type === '1') {
         skip = [{conditionJson: {conditions: [{}]}}];
       } else if (skip.type === '2') {
-        skip = [{conditionJson: {options: [{}], count: 0}}];
-      } else {
         skip = [{conditionJson: {questions: [{}], score: 0}}];
+      } else {
+        skip = [{conditionJson: {options: [{}], count: 0}}];
       }
     }
   }
@@ -632,7 +657,7 @@ export default {
   padding: 30px 20px 0 20px;
 }
 
-.cascader-refIds .el-cascader-panel .el-scrollbar:first-child .el-checkbox {
+.cascader-multi .el-cascader-panel .el-scrollbar:first-child .el-checkbox {
   display: none;
 }
 
@@ -643,6 +668,11 @@ export default {
 #skipFormDialog .el-input {
   width: 180px;
 }
+
+#skipFormDialog .el-input-number .el-input {
+  width: 130px;
+}
+
 
 #skipFormDialog .el-form-item {
   margin-bottom: 0;
