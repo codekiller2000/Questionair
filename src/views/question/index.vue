@@ -124,7 +124,7 @@
         <el-form-item :label="`${i+1}、符合以下条件时跳转到`">
           <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascader" v-model="skip.target"
                        :props="defaultSkipCascaderProps" ref="" popper-class="cascader-skip"></el-cascader>
-          <el-select v-model="skip.type" @change="skipTypeChanged(skip)" size="small" placeholder="请选择类型">
+          <el-select v-model="skip.type" size="small" placeholder="请选择类型">
             <el-option label="按各题选项跳转" value="1"></el-option>
             <el-option label="按答题分数跳转" value="2"></el-option>
             <el-option label="按选中数量跳转" value="3"></el-option>
@@ -159,6 +159,32 @@
           <el-input-number size="small" v-model="skip.conditionJson.score" step-strictly auto-complete="off"
                            placeholder="取值">
           </el-input-number>
+        </el-form-item>
+        <el-form-item v-if="skip.type === '3'">
+          <span style="padding: 0 0 0 22px">符合的数量应达到</span>
+          <el-input-number size="small" v-model="skip.conditionJson.count" step-strictly auto-complete="off"
+                           placeholder="取值">
+          </el-input-number>
+        </el-form-item>
+        <el-form-item v-if="skip.type === '3'" v-for="(support,j) in skip.conditionJson.supports" :key="j">
+          <!--          opt.questionId是[mid,qid]的数组-->
+          <el-cascader size="small" placeholder="题目" :options="moduleSimplifiedCascaderForSkip"
+                       v-model="support.questionId"
+                       :props="defaultSkipCascaderProps" popper-class="cascader-skip-condition"></el-cascader>
+          <el-select v-model="support.value" size="small" placeholder="请选择">
+            <el-option
+              v-for="(option, k) in support.questionId && support.questionId.length === 2 ? moduleSimplifiedCascaderForSkip[moduleIdIndexMap[support.questionId[0]]].questions[questionIdIndexMap[support.questionId[1]]].optData.options:[{}]"
+              :label="option.label" :key="k" :value="option.value"></el-option>
+          </el-select>
+          <div style="width: 180px;float: right">
+            <el-button size="small" type="text">
+              <i style="color: #ff4949;font-size: 24px" class="el-icon-circle-plus-outline"
+                 @click="addSupport(i)"></i>
+            </el-button>
+            <el-button size="small" type="text">
+              <i style="color: #409eff;font-size: 24px" class="el-icon-remove-outline" @click="minusSupport(i,j)"></i>
+            </el-button>
+          </div>
         </el-form-item>
         <el-divider></el-divider>
       </el-form>
@@ -493,7 +519,8 @@ export default {
           let temp = {
             target: s.target[1],
             type: s.type,
-            queId: this.queId4Skip
+            queId: this.queId4Skip,
+            "serialNum": i
           };
           let cj = s.conditionJson;
           if (s.type === "1") {
@@ -517,6 +544,15 @@ export default {
             }
             temp.conditionJson = {"questions": tempQuestions, "score": cj.score};
           } else {
+            let tempSupports = [];
+            for (let i in cj.supports) {
+              let c = cj.supports[i];
+              if (!c.value || !c.questionId[1] || (!cj.count && cj.count !== 0)) {
+                return false;
+              }
+              tempSupports.push({value: c.value, questionId: c.questionId[1]})
+            }
+            temp.conditionJson = {"supports": tempSupports, "count": cj.count};
           }
           tempList.push(temp)
         } else {
@@ -547,7 +583,11 @@ export default {
           })
           temp.conditionJson = {"questions": tempQuestions, "score": cj.score};
         } else {
-
+          let tempSupports = [];
+          cj.supports.forEach(c => {
+            tempSupports.push({value: c.value, questionId: [this.question2ModuleMap[c.questionId], c.questionId]})
+          })
+          temp.conditionJson = {"supports": tempSupports, "count": cj.count};
         }
         tempList.push(temp)
       });
@@ -599,7 +639,15 @@ export default {
       this.question2ModuleMap = q2mMap;
     },
     addSkip() {
-      this.skipRulesForDialog.push({conditionJson: {conditions: [{}], options: [], questions: [], count: 0, score: 0}})
+      this.skipRulesForDialog.push({
+        conditionJson: {
+          conditions: [{}],
+          supports: [{}],
+          questions: [],
+          count: 0,
+          score: 0
+        }
+      })
     },
     minusSkip() {
       this.skipRulesForDialog.pop()
@@ -610,6 +658,14 @@ export default {
     minusCondition(i, j) {
       if (this.skipRulesForDialog[i].conditionJson.conditions.length > 1) {
         this.skipRulesForDialog[i].conditionJson.conditions.splice(j, 1)
+      }
+    },
+    addSupport(i) {
+      this.skipRulesForDialog[i].conditionJson.supports.push({})
+    },
+    minusSupport(i, j) {
+      if (this.skipRulesForDialog[i].conditionJson.supports.length > 1) {
+        this.skipRulesForDialog[i].conditionJson.supports.splice(j, 1)
       }
     },
     commitSkip() {
@@ -634,15 +690,6 @@ export default {
         this.skipLoading = false;
         this.$message.error('系统出错，保存失败')
       })
-    },
-    skipTypeChanged(skip) {
-      if (skip.type === '1') {
-        skip = [{conditionJson: {conditions: [{}]}}];
-      } else if (skip.type === '2') {
-        skip = [{conditionJson: {questions: [{}], score: 0}}];
-      } else {
-        skip = [{conditionJson: {options: [{}], count: 0}}];
-      }
     }
   }
 }
