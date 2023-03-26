@@ -527,7 +527,7 @@ export default {
             let tempConditions = [];
             for (let i in cj.conditions) {
               let c = cj.conditions[i];
-              if (!c.value || !c.questionId[1]) {
+              if ((!c.value && c.value !== 0) || !c.questionId[1]) {
                 return false;
               }
               tempConditions.push({value: c.value, questionId: c.questionId[1]})
@@ -547,7 +547,7 @@ export default {
             let tempSupports = [];
             for (let i in cj.supports) {
               let c = cj.supports[i];
-              if (!c.value || !c.questionId[1] || (!cj.count && cj.count !== 0)) {
+              if ((!c.value && c.value !== 0) || !c.questionId[1] || (!cj.count && cj.count !== 0)) {
                 return false;
               }
               tempSupports.push({value: c.value, questionId: c.questionId[1]})
