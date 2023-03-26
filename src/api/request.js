@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Message } from "element-ui";
 
 
-let baseURL = 'http://192.168.31.150:8999/que-api'    //接口请求的域名(生产和测试环境一般不同)
+let baseURL = 'http://192.168.31.159:8999/que-api'    //接口请求的域名(生产和测试环境一般不同)
 
 
 /**

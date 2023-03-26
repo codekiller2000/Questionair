@@ -143,6 +143,7 @@ export default {
     // this.editForm.moduleNo = this.$route.params.moduleNo
     // //返回上一页需要templateId
     this.templateId = this.$route.params.templateId
+    this.editForm.templateId=this.templateId
     this.getData();
   },
   methods: {
@@ -163,46 +164,46 @@ export default {
     getData() {
       this.loading = true
       // 模拟数据开始
-      let res = {
-        code: 0,
-        msg: null,
-        count: 5,
-        data: [
-          {
-            "id": "q10001",
-            "questionNo": "2e",
-            "queType": 1,
-            "optType": "RADIO",
-            "issue": "测试一下问题(接口更新1)长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长",
-            "note": "补充说明1",
-            "answers": 1,
-            "optData": {
-              "options": [
-                {
-                  "label": "否",
-                  "value": 0
-                },
-                {
-                  "label": "是",
-                  "value": 1
-                },
-                {
-                  "label": "不知道",
-                  "value": 2
-                }
-              ]
-            },
-            "skipRule": null,
-            "refIds": [
-              "1636340836291145729",
-              "q10003"
-            ],
-            "serialNum": 1
-          }
-        ]
-      }
-      this.loading = false
-      this.listData = res.data
+      // let res = {
+      //   code: 0,
+      //   msg: null,
+      //   count: 5,
+      //   data: [
+      //     {
+      //       "id": "q10001",
+      //       "questionNo": "2e",
+      //       "queType": 1,
+      //       "optType": "RADIO",
+      //       "issue": "测试一下问题(接口更新1)长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长",
+      //       "note": "补充说明1",
+      //       "answers": 1,
+      //       "optData": {
+      //         "options": [
+      //           {
+      //             "label": "否",
+      //             "value": 0
+      //           },
+      //           {
+      //             "label": "是",
+      //             "value": 1
+      //           },
+      //           {
+      //             "label": "不知道",
+      //             "value": 2
+      //           }
+      //         ]
+      //       },
+      //       "skipRule": null,
+      //       "refIds": [
+      //         "1636340836291145729",
+      //         "q10003"
+      //       ],
+      //       "serialNum": 1
+      //     }
+      //   ]
+      // }
+      // this.loading = false
+      // this.listData = res.data
       // 模拟数据结束
 
       // 获取用户列表
@@ -264,7 +265,7 @@ export default {
       // this.questionId = '';
       this.editFormVisible = true
       this.handleStatus = 1;
-      this.editForm.templateId = ''
+      // this.editForm.templateId = ''
       this.editForm.moduleName=''
       this.editForm.moduleNo=''
       this.editForm.description = '';
