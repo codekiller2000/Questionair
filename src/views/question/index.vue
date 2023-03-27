@@ -409,10 +409,23 @@ export default {
       this.optionDialogVisible = true;
     },
     closeOptionDialog() {
+      let temps = this.editForm.optData.options;
+      for (let i = 0; i < temps.length; i++) {
+        if (!temps[i].value && temps[i].value !== 0) {
+          this.$message.warning("选项后的取值不能为空")
+            return false;
+        }
+        for (let j = i + 1; j < temps.length; j++) {
+          if (temps[i].value === temps[j].value) {
+            this.$message.warning("选项后的取值不能重复")
+            return false;
+          }
+        }
+      }
       this.optionDialogVisible = false;
     },
     addOption() {
-      this.editForm.optData.options.push({label: '', value: 0})
+      this.editForm.optData.options.push({label: '', value: this.editForm.optData.options.length})
     },
     minusOption() {
       this.editForm.optData.options.pop()
