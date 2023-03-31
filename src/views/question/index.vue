@@ -532,7 +532,6 @@ export default {
           let temp = {
             target: s.target[1],
             type: s.type,
-            queId: this.queId4Skip,
             "serialNum": i
           };
           let cj = s.conditionJson;
@@ -689,7 +688,7 @@ export default {
         this.skipLoading = false;
         return;
       }
-      saveSkip(this.skipRules).then(res => {
+      saveSkip(this.skipRules, this.queId4Skip).then(res => {
         if (res.data.code === "000000") {
           this.getData()
           this.$message.success("保存成功")

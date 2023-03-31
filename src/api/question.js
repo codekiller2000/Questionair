@@ -9,8 +9,8 @@ export const saveQuestion = (data) => {
   return server.post("/question", data)
 };
 // 保存问题
-export const saveSkip = (data) => {
-  return server.post("/skip/saveBatch", data)
+export const saveSkip = (data, queId) => {
+  return server.post(`/skip/saveBatch/${queId}`, data)
 };
 // 更新问题
 export const updateQuestion = (id, data) => {
